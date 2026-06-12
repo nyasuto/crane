@@ -9,6 +9,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from crane.model import HybridModel
+
 
 @dataclass(frozen=True)
 class SimplestParams:
@@ -33,3 +35,19 @@ def heelstrike_map(x: np.ndarray) -> np.ndarray:
 def lift(theta: float, theta_dot: float) -> np.ndarray:
     """Poincaré 断面座標 y=(θ, θ̇) を全状態へ持ち上げる（衝突直後の拘束）。"""
     return np.array([theta, 2.0 * theta, theta_dot, (1.0 - np.cos(2.0 * theta)) * theta_dot])
+
+
+def make_simplest(p: SimplestParams) -> HybridModel:
+    """パラメータ束縛済みの HybridModel を返す。
+
+    受理条件: θ<0 かつ ġ>0。交差点では ẏ_sw = sin(θ)·ġ が成り立ち、
+    θ<0 で ġ>0 ⇔ swing 足が下降して接地（scuff-dip 出口の上昇交差を除外）。
+    """
+    return HybridModel(
+        dynamics=lambda t, x: dynamics(t, x, p),
+        strike_value=lambda x: x[1] - 2.0 * x[0],
+        strike_accept=lambda x: x[0] < 0.0 and (x[3] - 2.0 * x[2]) > 0.0,
+        impact=heelstrike_map,
+        lift=lambda y: lift(y[0], y[1]),
+        project=lambda x: np.array([x[0], x[2]]),
+    )

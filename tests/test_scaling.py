@@ -3,7 +3,7 @@
 import numpy as np
 
 from crane import references as ref
-from crane.models.simplest import SimplestParams
+from crane.models.simplest import SimplestParams, make_simplest
 from crane.search import find_limit_cycle
 
 
@@ -21,7 +21,7 @@ def test_stance_angle_scales_as_gamma_one_third():
 
     # γ=0.009 の不動点を一度だけ計算（upward/downward 両チェーンの共通起点）
     seed_gamma = ref.GAMMA_REF
-    seed_fp = find_limit_cycle(SimplestParams(gamma=seed_gamma), seed_y)
+    seed_fp = find_limit_cycle(make_simplest(SimplestParams(gamma=seed_gamma)), seed_y)
     assert seed_fp.converged, f"no convergence at gamma={seed_gamma}"
     assert seed_fp.eigenvalues is not None
     assert np.max(np.abs(seed_fp.eigenvalues)) < 1.0, (
@@ -33,7 +33,7 @@ def test_stance_angle_scales_as_gamma_one_third():
     # upward chain: 0.009 → 0.012
     y = seed_fp.y.copy()
     for gamma in [0.012]:
-        fp = find_limit_cycle(SimplestParams(gamma=gamma), y)
+        fp = find_limit_cycle(make_simplest(SimplestParams(gamma=gamma)), y)
         assert fp.converged, f"no convergence at gamma={gamma}"
         assert fp.eigenvalues is not None
         assert np.max(np.abs(fp.eigenvalues)) < 1.0, (
@@ -45,7 +45,7 @@ def test_stance_angle_scales_as_gamma_one_third():
     # downward chain: 0.009 → 0.006 → 0.004
     y = seed_fp.y.copy()
     for gamma in [0.006, 0.004]:
-        fp = find_limit_cycle(SimplestParams(gamma=gamma), y)
+        fp = find_limit_cycle(make_simplest(SimplestParams(gamma=gamma)), y)
         assert fp.converged, f"no convergence at gamma={gamma}"
         assert fp.eigenvalues is not None
         assert np.max(np.abs(fp.eigenvalues)) < 1.0, (

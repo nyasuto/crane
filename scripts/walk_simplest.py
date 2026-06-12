@@ -10,7 +10,7 @@ import sys
 import numpy as np
 
 from crane import references as ref
-from crane.models.simplest import SimplestParams, lift
+from crane.models.simplest import SimplestParams, lift, make_simplest
 from crane.runs import new_run_dir
 from crane.search import find_limit_cycle
 from crane.stride import StrideError, stride
@@ -25,9 +25,10 @@ def main() -> None:
     args = parser.parse_args()
 
     p = SimplestParams(gamma=args.gamma)
+    model = make_simplest(p)
     run_dir = new_run_dir(f"simplest_g{args.gamma:g}")
 
-    fp = find_limit_cycle(p, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT]))
+    fp = find_limit_cycle(model, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT]))
     print(
         f"converged={fp.converged}  y*={fp.y}  |lambda|={np.abs(fp.eigenvalues) if fp.eigenvalues is not None else None}"
     )
@@ -49,7 +50,7 @@ def main() -> None:
     strides = []
     for i in range(args.strides):
         try:
-            result = stride(p, x)
+            result = stride(model, x)
         except StrideError as e:
             print(f"stride {i}: FELL ({e})")
             break

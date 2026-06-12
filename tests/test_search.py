@@ -3,11 +3,11 @@
 import numpy as np
 
 from crane import references as ref
-from crane.models.simplest import SimplestParams
+from crane.models.simplest import SimplestParams, make_simplest
 from crane.search import find_limit_cycle
 
 
-P = SimplestParams(gamma=ref.GAMMA_REF)
+MODEL = make_simplest(SimplestParams(gamma=ref.GAMMA_REF))
 
 
 def test_long_period_fixed_point_matches_garcia1998():
@@ -21,7 +21,7 @@ def test_long_period_fixed_point_matches_garcia1998():
     # ±5% は stride 領域外（即 StrideError）、±2% は basin 境界近くで J の固有値が +1 を跨ぎ Newton が発散。
     # ±1% は健全に収束（数値確認済み）
     guess = np.array([ref.LONG_PERIOD_THETA * 1.01, ref.LONG_PERIOD_THETA_DOT * 0.99])
-    fp = find_limit_cycle(P, guess)
+    fp = find_limit_cycle(MODEL, guess)
     assert fp.converged
     assert np.isclose(fp.y[0], ref.LONG_PERIOD_THETA, rtol=0, atol=1.5e-3)
     assert np.isclose(fp.y[1], ref.LONG_PERIOD_THETA_DOT, rtol=0, atol=1.5e-3)
@@ -30,7 +30,7 @@ def test_long_period_fixed_point_matches_garcia1998():
 def test_short_period_fixed_point_matches_garcia1998():
     """short-period gait の不動点も文献値と一致（同じ許容誤差の根拠）。"""
     guess = np.array([ref.SHORT_PERIOD_THETA, ref.SHORT_PERIOD_THETA_DOT])
-    fp = find_limit_cycle(P, guess)
+    fp = find_limit_cycle(MODEL, guess)
     assert fp.converged
     assert np.isclose(fp.y[0], ref.SHORT_PERIOD_THETA, rtol=0, atol=1.5e-3)
     assert np.isclose(fp.y[1], ref.SHORT_PERIOD_THETA_DOT, rtol=0, atol=1.5e-3)
@@ -38,7 +38,7 @@ def test_short_period_fixed_point_matches_garcia1998():
 
 def test_long_period_gait_is_stable():
     """γ=0.009 の long-period gait は漸近安定 (max|λ| < 1)。"""
-    fp = find_limit_cycle(P, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT]))
+    fp = find_limit_cycle(MODEL, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT]))
     assert fp.converged
     assert np.max(np.abs(fp.eigenvalues)) < 1.0
     if ref.LONG_PERIOD_EIGENVALUE_ABS is not None:
@@ -52,7 +52,7 @@ def test_convergence_history_is_logged():
     # ±5% は stride 領域外（即 StrideError）、±2% は basin 境界近くで J の固有値が +1 を跨ぎ Newton が発散。
     # ±1% は健全に収束（数値確認済み）
     guess = np.array([ref.LONG_PERIOD_THETA * 1.01, ref.LONG_PERIOD_THETA_DOT * 0.99])
-    fp = find_limit_cycle(P, guess)
+    fp = find_limit_cycle(MODEL, guess)
     residuals = [r for _, r in fp.history]
     assert len(residuals) >= 2
     assert residuals[-1] < residuals[0]
