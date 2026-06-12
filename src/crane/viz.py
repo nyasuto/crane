@@ -45,15 +45,16 @@ def animate_walk(strides: list[StrideResult], gamma: float, out: Path, fps: int 
     foot_x = 0.0
     dt_frame = 1.0 / fps
     for s in strides:
-        t_resampled = np.arange(0.0, s.t[-1], dt_frame)
-        for ti in t_resampled:
-            idx = int(np.searchsorted(s.t, ti))
-            idx = min(idx, s.t.size - 1)
-            theta, phi = s.x[0, idx], s.x[1, idx]
-            hip, swing = link_points(theta, phi, foot_x)
+        # strike 瞬間を最終フレームとして含める（arange は末端を除くため append）
+        t_resampled = np.append(np.arange(0.0, s.t[-1], dt_frame), s.t[-1])
+        theta_i = np.interp(t_resampled, s.t, s.x[0])
+        phi_i = np.interp(t_resampled, s.t, s.x[1])
+        for theta, phi in zip(theta_i, phi_i):
+            hip, swing = link_points(float(theta), float(phi), foot_x)
             foot = np.array([foot_x, 0.0])
             frames.append((rot @ foot, rot @ hip, rot @ swing))
-        # heel-strike: swing 足の着地点が次の stance アンカー
+        # heel-strike: x_strike（衝突前状態）の swing 足位置を次 stride の stance アンカーに使う。
+        # 衝突後の leg-swap より前の着地ジオメトリが正しい foot_x を与えるため x_strike を参照する。
         _, swing_end = link_points(s.x_strike[0], s.x_strike[1], foot_x)
         foot_x = float(swing_end[0])
 
