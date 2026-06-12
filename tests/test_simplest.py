@@ -30,6 +30,18 @@ def test_heelstrike_velocity_map():
     assert np.isclose(x_plus[3], c * (1 - c) * theta_dot)
 
 
+def test_dynamics_nonzero_state_pins_each_term():
+    """非ゼロ状態で各項の符号を固定（sin/cos 項の転記ミス検出）。"""
+    theta, phi, theta_dot, phi_dot = 0.2, 0.1, -0.25, 0.3
+    xdot = dynamics(0.0, [theta, phi, theta_dot, phi_dot], P)
+    theta_dd = np.sin(theta - P.gamma)
+    phi_dd = theta_dd + theta_dot**2 * np.sin(phi) - np.cos(theta - P.gamma) * np.sin(phi)
+    assert xdot[0] == theta_dot
+    assert xdot[1] == phi_dot
+    assert np.isclose(xdot[2], theta_dd, rtol=0, atol=1e-15)
+    assert np.isclose(xdot[3], phi_dd, rtol=0, atol=1e-15)
+
+
 def test_post_impact_state_is_on_section():
     """衝突直後は φ=2θ かつ φ̇=(1−cos2θ)θ̇ が成立 = lift と整合。"""
     x_plus = heelstrike_map(np.array([-0.2, -0.4, -0.25, -0.01]))
