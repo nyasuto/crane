@@ -57,24 +57,10 @@ def find_limit_cycle(
     y = np.asarray(y_guess, dtype=float).copy()
     history: list[tuple[np.ndarray, float]] = []
 
-    # 初期推測がバスン外なら、1回の Poincaré 反復で引き込んだ点を起点にする
+    # 初期推測がバスン外なら即座に失敗を返す（呼び出し側がバスン内の推測を供給する責任）
     img, norm = _try_poincare(p, y)
     if img is None:
-        # 単純反復 S(y): 1回の stride を起点として Newton に渡す
-        # バスン外の場合は縮小率を落として近くの有効点を探す
-        found = False
-        for scale in [0.9, 0.75, 0.5, 0.25]:
-            # 参照不動点近傍の O(γ^1/3) スケールの点に向けて補間
-            anchor = np.array([p.gamma ** (1.0 / 3.0) * 0.97, -(p.gamma ** (1.0 / 3.0)) * 1.045])
-            y_try = y * scale + anchor * (1.0 - scale)
-            img_try, norm_try = _try_poincare(p, y_try)
-            if img_try is not None:
-                y = y_try
-                img, norm = img_try, norm_try
-                found = True
-                break
-        if not found:
-            return FixedPoint(y=y, eigenvalues=None, converged=False, history=history)
+        return FixedPoint(y=y, eigenvalues=None, converged=False, history=history)
 
     assert img is not None and norm is not None
     history.append((y.copy(), norm))

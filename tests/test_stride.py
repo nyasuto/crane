@@ -31,3 +31,15 @@ def test_stride_raises_when_no_heelstrike():
     x0 = lift(0.001, 0.0)  # ほぼ直立静止 → 歩かない
     with pytest.raises(StrideError):
         stride(P, x0)
+
+
+def test_stride_short_period_reaches_true_strike():
+    """short-period 参照点からの1歩は τ₀=π 近傍で下降接地する。
+
+    θ<0 だが足が上昇中の偽交差 (t≈2.13) を弾けることのゲート。
+    許容幅は O(γ) 近似のずれ込み（references.py 参照）。
+    """
+    x0 = lift(ref.SHORT_PERIOD_THETA, ref.SHORT_PERIOD_THETA_DOT)
+    result = stride(P, x0)
+    assert np.isclose(result.t_step, np.pi, atol=0.1)
+    assert result.x_strike[0] < -0.1  # 真の strike (θ≈-0.195)。偽交差なら -0.048

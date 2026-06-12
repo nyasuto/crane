@@ -1,4 +1,11 @@
-"""stride 写像: 衝突直後状態から積分 → heel-strike → 衝突写像 → 次の衝突直後状態。"""
+"""stride 写像: 衝突直後状態から積分 → heel-strike → 衝突写像 → 次の衝突直後状態。
+
+heel-strike 判定の幾何学:
+    面 g = φ−2θ = 0 は1歩の中で複数回交差することがある。
+    swing 足高さ変化率 ẏ_sw = sin(θ)·ġ（ġ = φ̇−2θ̇）。
+    θ<0 かつ ġ>0 のとき ẏ_sw<0 → swing 足が下降接地 → 本物の heel-strike。
+    ġ≤0 の交差は scuff-dip 出口（足が上昇中）であり無視する。
+"""
 
 from dataclasses import dataclass
 
@@ -76,7 +83,10 @@ def stride(
 
         t_e = sol.t_events[0][0]
         x_e = sol.y_events[0][0]
-        if x_e[0] < 0.0:  # 本物の heel-strike（stance 脚が鉛直を越えている）
+        g_dot = x_e[3] - 2.0 * x_e[2]
+        if (
+            x_e[0] < 0.0 and g_dot > 0.0
+        ):  # 本物の heel-strike: stance が鉛直越え かつ swing 足が下降接地
             return StrideResult(
                 x_end=heelstrike_map(x_e),
                 x_strike=x_e,
