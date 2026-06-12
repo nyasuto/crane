@@ -15,7 +15,7 @@ Heron (~/git/heron) の後継。設計は docs/2026-06-12-crane-design.md を参
 
 ## 検証の流儀
 - テストカバレッジではなく「文献の公表数値との一致」が各 Phase のゲート
-- 文献値は必ず provenance (URL, 取得日) 付きで src/crane/references.py に記録
+- 文献値は必ず provenance (URL, 取得日) 付きで src/crane/references*.py に記録
 - Claude の記憶からの数値をゲートに使わない（Heron 教訓）
 - 歩容の最終判定はぽんぽこ殿の動画観察（観察フェーズ）
 
