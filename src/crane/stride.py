@@ -45,12 +45,20 @@ def stride(
     ts: list[np.ndarray] = []
     xs: list[np.ndarray] = []
 
+    def _append(t_seg: np.ndarray, x_seg: np.ndarray) -> None:
+        if ts:  # 2セグメント目以降は境界点の重複を落とす
+            t_seg, x_seg = t_seg[1:], x_seg[:, 1:]
+        ts.append(t_seg)
+        xs.append(x_seg)
+
     while t0 < t_max:
         # burn-in: event なしで微小区間を進める
         burn = solve_ivp(dynamics, (t0, t0 + T_BURN), x, args=(p,), rtol=rtol, atol=atol)
-        ts.append(burn.t)
-        xs.append(burn.y)
+        _append(burn.t, burn.y)
         t0, x = burn.t[-1], burn.y[:, -1]
+
+        if t0 >= t_max:
+            break  # burn-in が t_max を踏み越えた場合はループを抜けて StrideError へ
 
         sol = solve_ivp(
             dynamics,
@@ -61,8 +69,7 @@ def stride(
             rtol=rtol,
             atol=atol,
         )
-        ts.append(sol.t)
-        xs.append(sol.y)
+        _append(sol.t, sol.y)
 
         if sol.t_events[0].size == 0:
             break  # t_max まで heel-strike なし

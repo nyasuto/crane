@@ -23,7 +23,7 @@ def test_stride_records_trajectory():
     result = stride(P, x0)
     assert result.t.shape[0] == result.x.shape[1]
     assert result.t[0] == 0.0
-    assert np.all(np.diff(result.t) >= 0)
+    assert np.all(np.diff(result.t) > 0)
 
 
 def test_stride_raises_when_no_heelstrike():
