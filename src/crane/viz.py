@@ -1,5 +1,6 @@
 """phase portrait と stick-figure アニメーション（slope frame 描画）。"""
 
+from collections.abc import Callable
 from pathlib import Path
 
 import matplotlib
@@ -12,16 +13,24 @@ import numpy as np
 from crane.stride import StrideResult
 
 
+def link_points_abs(theta_st: float, psi_sw: float, foot_x: float) -> tuple[np.ndarray, np.ndarray]:
+    """slope frame での hip / swing 足の座標（絶対角版、脚長 l=1）。
+
+    stance 足を (foot_x, 0) に置く。脚角 ψ の足先は hip + (sin ψ, −cos ψ)。
+    theta_st: stance 脚の絶対角、psi_sw: swing 脚の絶対角。
+    """
+    hip = np.array([foot_x - np.sin(theta_st), np.cos(theta_st)])
+    swing = hip + np.array([np.sin(psi_sw), -np.cos(psi_sw)])
+    return hip, swing
+
+
 def link_points(theta: float, phi: float, foot_x: float) -> tuple[np.ndarray, np.ndarray]:
-    """slope frame での hip / swing 足の座標 (脚長 l=1)。
+    """slope frame での hip / swing 足の座標 (脚長 l=1)。後方互換ラッパー。
 
     stance 足を (foot_x, 0) に置く。脚角 ψ の足先は hip + (sin ψ, −cos ψ)。
     stance: ψ=θ、swing: ψ=θ−φ。
     """
-    hip = np.array([foot_x - np.sin(theta), np.cos(theta)])
-    psi = theta - phi
-    swing = hip + np.array([np.sin(psi), -np.cos(psi)])
-    return hip, swing
+    return link_points_abs(theta, theta - phi, foot_x)
 
 
 def plot_phase_portrait(strides: list[StrideResult], out: Path) -> None:
@@ -36,8 +45,21 @@ def plot_phase_portrait(strides: list[StrideResult], out: Path) -> None:
     plt.close(fig)
 
 
-def animate_walk(strides: list[StrideResult], gamma: float, out: Path, fps: int = 30) -> None:
-    """stick-figure アニメ。slope frame で描き、全体を −γ 回転して坂を見せる。"""
+def animate_walk(
+    strides: list[StrideResult],
+    gamma: float,
+    out: Path,
+    fps: int = 30,
+    angles_of: Callable[[float, float], tuple[float, float]] | None = None,
+) -> None:
+    """stick-figure アニメ。slope frame で描き、全体を −γ 回転して坂を見せる。
+
+    angles_of: (q0, q1) -> (stance 絶対角, swing 絶対角)。
+    None なら simplest 規約 lambda q0, q1: (q0, q0 - q1)。
+    """
+    if angles_of is None:
+        angles_of = lambda q0, q1: (q0, q0 - q1)  # noqa: E731
+
     rot = np.array([[np.cos(-gamma), -np.sin(-gamma)], [np.sin(-gamma), np.cos(-gamma)]])
 
     # 各 stride の stance 足アンカーを heel-strike 位置で更新しながらフレーム列を作る
@@ -47,15 +69,17 @@ def animate_walk(strides: list[StrideResult], gamma: float, out: Path, fps: int 
     for s in strides:
         # strike 瞬間を最終フレームとして含める（arange は末端を除くため append）
         t_resampled = np.append(np.arange(0.0, s.t[-1], dt_frame), s.t[-1])
-        theta_i = np.interp(t_resampled, s.t, s.x[0])
-        phi_i = np.interp(t_resampled, s.t, s.x[1])
-        for theta, phi in zip(theta_i, phi_i):
-            hip, swing = link_points(float(theta), float(phi), foot_x)
+        q0_i = np.interp(t_resampled, s.t, s.x[0])
+        q1_i = np.interp(t_resampled, s.t, s.x[1])
+        for q0, q1 in zip(q0_i, q1_i):
+            theta_st, psi_sw = angles_of(float(q0), float(q1))
+            hip, swing = link_points_abs(theta_st, psi_sw, foot_x)
             foot = np.array([foot_x, 0.0])
             frames.append((rot @ foot, rot @ hip, rot @ swing))
         # heel-strike: x_strike（衝突前状態）の swing 足位置を次 stride の stance アンカーに使う。
         # 衝突後の leg-swap より前の着地ジオメトリが正しい foot_x を与えるため x_strike を参照する。
-        _, swing_end = link_points(s.x_strike[0], s.x_strike[1], foot_x)
+        theta_st_s, psi_sw_s = angles_of(float(s.x_strike[0]), float(s.x_strike[1]))
+        _, swing_end = link_points_abs(theta_st_s, psi_sw_s, foot_x)
         foot_x = float(swing_end[0])
 
     fig, ax = plt.subplots(figsize=(8, 4))
