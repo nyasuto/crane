@@ -6,14 +6,14 @@
 - [x] uv / ruff / pytest / src layout (Python 3.12 固定)
 - [x] solve_ivp イベント検出が解析解 π/2 と 1e-8 で一致
 
-## Phase 1: Simplest Walker (Garcia 1998) — 実装完了、歩容判定待ち
+## Phase 1: Simplest Walker (Garcia 1998) — 完了 (2026-06-13)
 - [x] EOM・衝突写像の実装と原論文 PDF との照合（完全一致）
 - [x] 文献値の provenance 付き記録 (references.py)
 - [x] Poincaré shooting で long-period 不動点発見 (0.2003109, -0.1998325)、文献 O(γ) 導出値と 1.5e-3 で一致
 - [x] 固有値で漸近安定性を確認 (max|λ| = 0.589 < 1)
 - [x] short-period 不動点も発見 (0.1939374, -0.2038669)、不安定 (max|λ| = 4.0) — 論文の記述と整合
 - [x] θ* ∝ γ^(1/3) スケーリング則を再現 (log-log slope 0.3287、理論 1/3)
-- [ ] **ぽんぽこ殿の歩容判定**: data/runs の walk.mp4 が「歩行」に見える
+- [x] **ぽんぽこ殿の歩容判定**: data/runs の walk.mp4 が「歩行」に見える（2026-06-13 合格判定）
 
 ### Phase 1 で得た知見
 - heel-strike の正しい受理条件は「θ < 0 かつ ġ > 0（swing 足が下降して接地）」。
