@@ -26,6 +26,28 @@ stride 0:  deviation 1.8e-3
 stride 29: deviation 6.6e-10   ← リミットサイクル収束
 ```
 
+## Phase 2 の結果 (Goswami 1996 Compass Gait, γ = 3°)
+
+| 種別 | θ_st* | θ̇_st* | θ̇_sw* | max\|λ\| | 安定性 |
+|------|--------|--------|--------|---------|-------|
+| period-1 (γ=3°) | 0.27103 | −1.09238 | −0.37737 | 0.580 | 安定 |
+
+文献値 (Goswami INRIA RR-2996) との一致: T=0.7343s（文献 0.735s、0.1%）、strike 角 0.2710（文献 0.271）
+
+**固有値**: 印刷値 0.332 は2歩合成写像の multiplier。1歩写像では 0.580²=0.336（1.3% 一致）
+
+**Period-doubling カスケード再現**:
+- period-1 不安定化: γ=4.40°（文献 4.37°、分解能 0.05° 以内）
+- period-2 branch: 4.40°–5.95° 追跡、period-2 不安定化 ~4.95°（文献の第2分岐 4.9°）
+- flip bifurcation（実固有値が −1 通過）確認
+
+デモ実行 (0.5% 摂動から 30 歩、収束):
+
+```
+stride 0:  deviation 6.7e-3
+stride 29: deviation 5.3e-10   ← リミットサイクル収束
+```
+
 ## セットアップ
 
 ```bash
@@ -37,10 +59,16 @@ Python 3.12 固定。
 ## 使い方
 
 ```bash
-# デモ歩行（walk.mp4 + phase_portrait.png + meta.json を data/runs/ に出力）
+# Phase 1 デモ歩行: Simplest Walker（walk.mp4 + phase_portrait.png + meta.json を data/runs/ に出力）
 uv run python scripts/walk_simplest.py [--gamma 0.009] [--strides 30] [--perturb 0.01]
 
-# テスト（19 tests）
+# Phase 2 デモ歩行: Compass Gait
+uv run python scripts/walk_compass.py [--gamma-deg 3.0] [--strides 30] [--perturb 0.005]
+
+# Phase 2 分岐図: slope continuation + period-doubling（bifurcation.csv + bifurcation.png）
+uv run python scripts/bifurcation_compass.py [--gamma-max-deg 6.0] [--step-deg 0.05]
+
+# テスト（41 tests）
 uv run pytest
 ```
 
