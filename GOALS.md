@@ -23,10 +23,10 @@
 - continuation は単調チェーン必須（距離順だと branch hopping、γ=0.012 で不安定枝に乗り移る実例）
 - basin 境界近くでは Poincaré 写像の固有値が +1 を跨ぎ Newton が発散する（±2% 摂動で実測）
 
-### 今後の課題（GitHub repo 作成後に issue 化）
-1. Newton バックトラッキングに Armijo 条件（残差増加ステップの排除）
-2. walk_simplest.py: 不安定サイクル収束時の警告 (max|λ|>1、γ=0.02 で λ=5.4 の実例)
-3. period-doubling カスケード探索 (γ → 0.0151+、Garcia Sec. 5.2-5.3)
+### 今後の課題（issue 化済み）
+- [#1](https://github.com/nyasuto/crane/issues/1) Newton バックトラッキングに Armijo 条件（残差増加ステップの排除）
+- [#2](https://github.com/nyasuto/crane/issues/2) walk_simplest.py: 不安定サイクル収束時の警告 (max|λ|>1、γ=0.02 で λ=5.4 の実例)
+- [#3](https://github.com/nyasuto/crane/issues/3) period-doubling カスケード探索 (γ → 0.0151+、Garcia Sec. 5.2-5.3)
 
 ## Phase 2: sympy 導出レイヤー + Compass Gait (McGeer 1990)
 Phase 1 ゲート通過後に計画策定。
