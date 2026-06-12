@@ -17,26 +17,36 @@ class FixedPoint:
     history: list[tuple[np.ndarray, float]] = field(default_factory=list)
 
 
-def poincare_map(model: HybridModel, y: np.ndarray) -> np.ndarray:
-    """断面 (heel-strike 直後) 上の reduced 写像。"""
-    return model.project(stride(model, model.lift(y)).x_end)
+def poincare_map(model: HybridModel, y: np.ndarray, *, n_strides: int = 1) -> np.ndarray:
+    """断面 (heel-strike 直後) 上の reduced 写像（n_strides 歩合成）。"""
+    x = model.lift(y)
+    for _ in range(n_strides):
+        x = stride(model, x).x_end
+    return model.project(x)
 
 
-def _try_poincare(model: HybridModel, y: np.ndarray) -> tuple[np.ndarray | None, float | None]:
+def _try_poincare(
+    model: HybridModel, y: np.ndarray, *, n_strides: int = 1
+) -> tuple[np.ndarray | None, float | None]:
     try:
-        img = poincare_map(model, y)
+        img = poincare_map(model, y, n_strides=n_strides)
         return img, float(np.linalg.norm(img - y))
     except StrideError:
         return None, None
 
 
-def _jacobian(model: HybridModel, y: np.ndarray, h: float = 1e-7) -> np.ndarray:
+def _jacobian(
+    model: HybridModel, y: np.ndarray, *, n_strides: int = 1, h: float = 1e-7
+) -> np.ndarray:
     n = y.size
     J = np.empty((n, n))
     for j in range(n):
         e = np.zeros(n)
         e[j] = h
-        J[:, j] = (poincare_map(model, y + e) - poincare_map(model, y - e)) / (2.0 * h)
+        J[:, j] = (
+            poincare_map(model, y + e, n_strides=n_strides)
+            - poincare_map(model, y - e, n_strides=n_strides)
+        ) / (2.0 * h)
     return J
 
 
@@ -46,6 +56,7 @@ def find_limit_cycle(
     *,
     tol: float = 1e-12,
     max_iter: int = 30,
+    n_strides: int = 1,
 ) -> FixedPoint:
     """Newton 法で S(y) = y を解く。
 
@@ -56,7 +67,7 @@ def find_limit_cycle(
     history: list[tuple[np.ndarray, float]] = []
 
     # 初期推測がバスン外なら即座に失敗を返す（呼び出し側がバスン内の推測を供給する責任）
-    img, norm = _try_poincare(model, y)
+    img, norm = _try_poincare(model, y, n_strides=n_strides)
     if img is None:
         return FixedPoint(y=y, eigenvalues=None, converged=False, history=history)
 
@@ -64,24 +75,24 @@ def find_limit_cycle(
     history.append((y.copy(), norm))
 
     if norm < tol:
-        J = _jacobian(model, y)
+        J = _jacobian(model, y, n_strides=n_strides)
         return FixedPoint(y=y, eigenvalues=np.linalg.eigvals(J), converged=True, history=history)
 
     for _ in range(max_iter - 1):
-        J = _jacobian(model, y)
+        J = _jacobian(model, y, n_strides=n_strides)
         # Newton 更新: F(y) = S(y) - y = 0 → (J_S - I) * Δy = S(y) - y → y_new = y - Δy
         step = np.linalg.solve(J - np.eye(y.size), img - y)
 
         # バックトラッキングライン探索: バスン外のステップを縮小する
         alpha = 1.0
         y_new = y - alpha * step
-        new_img, new_norm = _try_poincare(model, y_new)
+        new_img, new_norm = _try_poincare(model, y_new, n_strides=n_strides)
         for _ in range(10):
             if new_img is not None:
                 break
             alpha *= 0.5
             y_new = y - alpha * step
-            new_img, new_norm = _try_poincare(model, y_new)
+            new_img, new_norm = _try_poincare(model, y_new, n_strides=n_strides)
         else:
             return FixedPoint(y=y, eigenvalues=None, converged=False, history=history)
 
@@ -91,7 +102,7 @@ def find_limit_cycle(
         history.append((y.copy(), new_norm))
 
         if new_norm < tol:
-            J = _jacobian(model, y)
+            J = _jacobian(model, y, n_strides=n_strides)
             return FixedPoint(
                 y=y, eigenvalues=np.linalg.eigvals(J), converged=True, history=history
             )
