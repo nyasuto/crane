@@ -52,7 +52,8 @@ def main() -> None:
         gamma += step
 
     # period-2 branch（period-1 不安定化点から上向きに continuation）
-    # 1e-3 摂動で収束しない場合は S 写像を数回反復してからシードする（plan の指示）
+    # 1e-3 摂動で収束しない場合は S 写像を数回反復してからシードする
+    # （分岐点近傍で 1e-3 摂動は period-1 に回帰するため追加した fallback）
     if y2 is not None and y2_gamma is not None:
         gamma2 = y2_gamma
         # まず不安定化点で period-2 シードを確立する

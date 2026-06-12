@@ -67,8 +67,11 @@ def test_eigenvalues_match_published():
 
     # 2歩写像との照合: |λ_1step|² ≈ |λ_2step|
     # 複素対: 0.580² ≈ 0.336 vs 印刷 0.332。rtol=0.02（読み取り精度と整合）
-    assert np.isclose(mags[0] ** 2, 0.332, rtol=0.02), (
-        f"|λ|² = {mags[0] ** 2:.4f} should match paper's 2-step value 0.332 (rtol=0.02)"
+    # ref.POINCARE_EIGENVALUE_ABS = (0.332, 0.332, 0.014, 2.554e-9) — Goswami eq. (3.44)
+    # これは 2 歩合成写像の multiplier（references_goswami.py のコメント参照）
+    assert np.isclose(mags[0] ** 2, ref.POINCARE_EIGENVALUE_ABS[0], rtol=0.02), (
+        f"|λ|² = {mags[0] ** 2:.4f} should match paper's 2-step value "
+        f"{ref.POINCARE_EIGENVALUE_ABS[0]} (rtol=0.02)"
     )
 
     # 実数方向: 0.132² ≈ 0.017 vs 印刷 0.014。
@@ -76,8 +79,9 @@ def test_eigenvalues_match_published():
     # ここでは「< 1」（安定）と「2歩値より有意に小さい複素対より小さい」のみ確認する。
     assert mags[2] < mags[0], "実数方向 multiplier は複素対より小さいはず"
     assert mags[2] < 1.0, "実数方向も安定（< 1）であるはず"
-    # 参考: mags[2]² ≈ 0.017 は印刷 0.014 の約 24% 上（絶対差 0.003）
+    # 参考: mags[2]² ≈ 0.017 は印刷 ref.POINCARE_EIGENVALUE_ABS[2]=0.014 の約 24% 上（絶対差 0.003）
     # 断言は緩め（rtol=0.30）で記録しておく
-    assert np.isclose(mags[2] ** 2, 0.014, rtol=0.30), (
-        f"|λ_real|² = {mags[2] ** 2:.4f} should be in range of paper's 0.014 (rtol=0.30)"
+    assert np.isclose(mags[2] ** 2, ref.POINCARE_EIGENVALUE_ABS[2], rtol=0.30), (
+        f"|λ_real|² = {mags[2] ** 2:.4f} should be in range of paper's "
+        f"{ref.POINCARE_EIGENVALUE_ABS[2]} (rtol=0.30)"
     )

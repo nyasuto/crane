@@ -31,7 +31,7 @@
 ## Phase 2: sympy 導出レイヤー + Compass Gait (Goswami 点足系) — 実装完了、歩容判定待ち
 
 - [x] HybridModel プロトコル refactor: stride/search を model 非依存化（挙動変更なし）
-- [x] derive/lagrange.py: Euler-Lagrange 自動導出。二重振り子の教科書 EOM と 1e-15 一致、Noether 保存 6e-15
+- [x] derive/lagrange.py: Euler-Lagrange 自動導出。二重振り子の教科書 EOM と 1e-15 一致、Noether 保存 6e-15（tests/test_derive_lagrange.py に恒久化）
 - [x] derive/impact.py: 角運動量・衝突写像導出。pivot 乗り移り解析解 ψ̇=−0.5 再現
 - [x] models/compass.py: Goswami 点足 compass gait を記号導出で実装。不変量テスト（平衡・swing 相エネルギー保存・衝突 KE 減少・ラベル交換）全 pass
 - [x] **Garcia 退化ゲート**: compass(a=0, m=1e-9, m_h=1, l=1, g=1) が Phase 1 検証済み実装と一致 — dynamics 5e-9 / impact 8e-11 / 不動点 4e-10 / 固有値 0.58911 / slave 方向 multiplier 1e-10
