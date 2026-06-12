@@ -39,6 +39,7 @@ GAMMA_REF = 0.009
 
 # 論文印刷の O(γ) 解析近似係数（Fig. 3 caption / Appendix A.2 table, 6桁）
 # θ* ≈ Θ₀(0)·γ^(1/3) + Θ₁(0)·γ,  θ̇* = α·Θ₀(0)·γ^(1/3) + (α·Θ₁(0)+c₁)·γ
+# tau0 は無次元歩行周期の O(1) 項。Phase 1 で歩行周期の妥当性確認に使える
 LONG_PERIOD_COEFFS = {
     "tau0": 3.812092,
     "Theta0": 0.970956,
@@ -60,8 +61,8 @@ LONG_PERIOD_THETA: float = 0.199529  # stance angle θ* [rad]
 LONG_PERIOD_THETA_DOT: float = -0.198983  # θ̇*
 
 # γ=0.009 の short-period gait 不動点（同じく O(γ) 近似の導出値）
-SHORT_PERIOD_THETA: float | None = 0.193974
-SHORT_PERIOD_THETA_DOT: float | None = -0.203696
+SHORT_PERIOD_THETA: float = 0.193974
+SHORT_PERIOD_THETA_DOT: float = -0.203696
 
 # 安定性: 論文は γ=0.009 での固有値を数値としては印刷していない
 # （Fig. 4 はグラフのみ。解析近似 Jacobian は eq.27-28 に行列として印刷）。
@@ -72,4 +73,4 @@ STABLE_GAMMA_MAX: float | None = 0.0151
 # γ = 0.017→0.019 で period-doubling、γ ≈ 0.019 超で歩行消失（Sec. 5.3）。
 
 # スケーリング則 θ* ∝ γ^(1/3)（論文 eq.6、abstract でも明言）
-SCALING_EXPONENT = 1.0 / 3.0
+SCALING_EXPONENT: float = 1.0 / 3.0

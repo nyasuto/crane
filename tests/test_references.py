@@ -14,3 +14,6 @@ def test_references_are_filled():
     assert isinstance(ref.LONG_PERIOD_THETA, float)
     assert isinstance(ref.LONG_PERIOD_THETA_DOT, float)
     assert 0.0 < ref.LONG_PERIOD_THETA < 0.5
+    assert isinstance(ref.SHORT_PERIOD_THETA, float)
+    assert isinstance(ref.SHORT_PERIOD_THETA_DOT, float)
+    assert isinstance(ref.STABLE_GAMMA_MAX, float)
