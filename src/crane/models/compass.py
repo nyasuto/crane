@@ -20,7 +20,7 @@ import sympy as sp
 
 from crane.derive.impact import angular_momentum
 from crane.derive.lagrange import derive_qdd
-from crane.model import HybridModel
+from crane.model import HybridModel, PhaseSpec
 
 
 @dataclass(frozen=True)
@@ -119,10 +119,14 @@ def heelstrike_map(x: np.ndarray, p: CompassParams) -> np.ndarray:
 
 def make_compass(p: CompassParams) -> HybridModel:
     return HybridModel(
-        dynamics=lambda t, x: dynamics(t, x, p),
-        strike_value=lambda x: x[0] + x[1],
-        strike_accept=lambda x: x[0] < 0.0 and (x[2] + x[3]) < 0.0,
-        impact=lambda x: heelstrike_map(x, p),
+        phases=(
+            PhaseSpec(
+                dynamics=lambda t, x: dynamics(t, x, p),
+                event_value=lambda x: x[0] + x[1],
+                event_accept=lambda x: x[0] < 0.0 and (x[2] + x[3]) < 0.0,
+                impact=lambda x: heelstrike_map(x, p),
+            ),
+        ),
         lift=lambda y: np.array([y[0], -y[0], y[1], y[2]]),
         project=lambda x: np.array([x[0], x[2], x[3]]),
     )

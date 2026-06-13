@@ -9,7 +9,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from crane.model import HybridModel
+from crane.model import HybridModel, PhaseSpec
 
 
 @dataclass(frozen=True)
@@ -44,10 +44,14 @@ def make_simplest(p: SimplestParams) -> HybridModel:
     θ<0 で ġ>0 ⇔ swing 足が下降して接地（scuff-dip 出口の上昇交差を除外）。
     """
     return HybridModel(
-        dynamics=lambda t, x: dynamics(t, x, p),
-        strike_value=lambda x: x[1] - 2.0 * x[0],
-        strike_accept=lambda x: x[0] < 0.0 and (x[3] - 2.0 * x[2]) > 0.0,
-        impact=heelstrike_map,
+        phases=(
+            PhaseSpec(
+                dynamics=lambda t, x: dynamics(t, x, p),
+                event_value=lambda x: x[1] - 2.0 * x[0],
+                event_accept=lambda x: x[0] < 0.0 and (x[3] - 2.0 * x[2]) > 0.0,
+                impact=heelstrike_map,
+            ),
+        ),
         lift=lambda y: lift(y[0], y[1]),
         project=lambda x: np.array([x[0], x[2]]),
     )
