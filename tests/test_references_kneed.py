@@ -9,4 +9,6 @@ def test_kneed_references_are_filled():
         assert isinstance(getattr(ref, name), float), name
     assert isinstance(ref.GAMMA_GAIT, float)
     assert 0.0 < ref.GAMMA_GAIT < 0.3
-    assert len(ref.SECTION_GUESS) == 4
+    assert (
+        len(ref.SECTION_GUESS) == 3
+    )  # (θ_st, θ̇_st, θ̇_sw) — 3D 断面（rigid-through-collision 改訂）
