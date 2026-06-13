@@ -32,13 +32,19 @@
   3. **Phase B (locked, 実質 2 DOF)**: compass と同型。heel-strike 条件
      `g_B = θ_st + θ_th = 0`（swing 足高さ 0 の非自明側）、受理 = `θ_st < 0` かつ
      下降接地 `θ̇_st + θ̇_th < 0`（Phase 2 と同じ閉形式 ẏ_sw = −l sinθ_st(θ̇_st+θ̇_th)）
-  4. **heel-strike 衝突**（脚交換 + 新 swing 膝アンロック、2 速度 → 3 速度）: 保存則 3 本
-     - 系全体を新接地点回りで保存（pre-pinned / post-pinned の二重評価 + swap 代入、
-       Phase 2 で機械精度検証済みの定式化）
-     - 新 swing 脚（= 旧 stance 脚、大腿+脛）を hip 回りで保存
-     - 新 swing 脛（= 旧 stance 脛）を knee 回りで保存
-- **Poincaré 断面** = heel-strike 直後。位置は θ_th = θ_sh = −θ_st が成立するため
-  自由座標は **y = (θ_st, θ̇_st, θ̇_th, θ̇_sh) の 4 次元**。
+  4. **heel-strike 衝突**（脚交換、2 速度 → 2 速度 + 直後アンロック）: 保存則 2 本
+     **【2026-06-13 改訂: Task 2 の文献調査結果に基づく controller 裁定】**
+     Hsu Chen 2007 (Task 2 の一次資料) は「衝突の瞬間は両脚とも剛体（膝ロック維持）、
+     撃力通過後に新 swing 膝がアンロック」と定式化する。これは McGeer の機械式ロックの
+     物理（ストッパーは撃力を伝え、その後解放）と整合し、文献ゲートとの比較可能性を
+     担保するため、こちらを採用する（当初案の「脛の knee 回り保存」第3法則は不採用。
+     差異は kneed.py docstring に記録）:
+     - 系全体を新接地点回りで保存（pre-pinned / post-pinned の二重評価 + swap 代入）
+     - 新 swing 脚（= 旧 stance 脚、**剛体のまま**: 大腿+脛）を hip 回りで保存
+     - post は θ̇_th⁺ = θ̇_sh⁺（衝突中は剛体）。アンロックは次 stride の phase A 開始時
+- **Poincaré 断面** = heel-strike 直後。位置 θ_th = θ_sh = −θ_st に加え速度
+  θ̇_th = θ̇_sh が成立するため自由座標は **y = (θ_st, θ̇_st, θ̇_sw) の 3 次元**
+  （文献の印刷固有値 3 本と直接照合可能）。
 - **compass への退化**: m_s = 1e-9, b_t = compass の b 相当で、locked 相力学・
   heel-strike・**全 stride 不動点**が Phase 2 検証済み compass に一致するはず
   （massless 脛は slave 振り子、knee-strike 撃力 → 0）。**これがレイヤー検証ゲート**。
@@ -234,11 +240,11 @@ def test_kneed_references_are_filled():
         assert isinstance(getattr(ref, name), float), name
     assert isinstance(ref.GAMMA_GAIT, float)
     assert 0.0 < ref.GAMMA_GAIT < 0.3
-    assert len(ref.SECTION_GUESS) == 4
+    assert len(ref.SECTION_GUESS) == 3  # (θ_st, θ̇_st, θ̇_sw) — 3D 断面（2026-06-13 改訂）
 ```
 
 必須フィールド: `PROVENANCE`, 上記 7 パラメータ, `G`, `GAMMA_GAIT`,
-`SECTION_GUESS`（我々の 4D 断面座標 (θ_st, θ̇_st, θ̇_th, θ̇_sh)、変換根拠コメント必須）,
+`SECTION_GUESS`（我々の 3D 断面座標 (θ_st, θ̇_st, θ̇_sw)、変換根拠コメント必須）,
 `GAIT_TOLERANCE`（根拠コメント）, 照合量（`STEP_PERIOD: float | None` 等、印刷形式に
 合わせて）, `KNEE_FLEXION_SIGN`（+1 なら swing 中 θ_sh > θ_th、コメントに図の根拠）。
 論文に無い量は None + 理由。
@@ -429,29 +435,26 @@ def _build():
     qd_post_ks = A_ks.LUsolve(rhs_ks)
     f_impact_ks = sp.lambdify(args6, [qd_post_ks[0], qd_post_ks[1]], "numpy")
 
-    # --- heel-strike 衝突（脚交換 + 新 swing 膝アンロック、2 速度 → 3 速度）---
+    # --- heel-strike 衝突（脚交換、衝突中は両脚剛体 = 膝ロック維持。2 速度 → 2 速度）---
+    # 【Task 2 文献調査に基づく定式化: Hsu Chen 2007 / McGeer の機械式ロックと整合】
     # pre は locked 配置（θ_th=θ_sh）の pre-pinned 系で評価。
     # post は post-pinned 系（同形の式）に swap 代入:
     #   位置: th_st→th_th（新 stance = 旧 swing 角）、th_th→th_st, th_sh→th_st
-    #         （新 swing 大腿・脛は旧 stance 角で整列）
-    #   速度: w_st→wq_st, w_th→wq_th, w_sh→wq_sh（post ラベル）
-    wq_st, wq_th, wq_sh = sp.symbols("wq_st wq_th wq_sh")
+    #   速度: w_st→wq_st, w_th→wq_leg, w_sh→wq_leg（新 swing 脚は衝突中剛体）
+    wq_st, wq_leg = sp.symbols("wq_st wq_leg")
     swap_hs = {
         th_st: th_th, th_th: th_st, th_sh: th_st,
-        w_st: wq_st, w_th: wq_th, w_sh: wq_sh,
+        w_st: wq_st, w_th: wq_leg, w_sh: wq_leg,
     }
     L_stleg_hip3 = angular_momentum([(m_t, p_th_st), (m_s, p_sh_st)], q3, qd3, hip)
-    L_stsh_knee3 = angular_momentum([(m_s, p_sh_st)], q3, qd3, knee_st)
-    L_swsh_knee3 = angular_momentum([(m_s, p_sh_sw)], q3, qd3, knee_sw)
     L_sys_swfoot3 = angular_momentum(bodies, q3, qd3, foot_sw)
     eqs_hs = [
         L_sys_pivot3.subs(swap_hs, simultaneous=True) - L_sys_swfoot3,
         L_swleg_hip3.subs(swap_hs, simultaneous=True) - L_stleg_hip3,
-        L_swsh_knee3.subs(swap_hs, simultaneous=True) - L_stsh_knee3,
     ]
-    A_hs, rhs_hs = sp.linear_eq_to_matrix(eqs_hs, [wq_st, wq_th, wq_sh])
+    A_hs, rhs_hs = sp.linear_eq_to_matrix(eqs_hs, [wq_st, wq_leg])
     qd_post_hs = A_hs.LUsolve(rhs_hs)
-    f_impact_hs = sp.lambdify(args6, [qd_post_hs[0], qd_post_hs[1], qd_post_hs[2]], "numpy")
+    f_impact_hs = sp.lambdify(args6, [qd_post_hs[0], qd_post_hs[1]], "numpy")
 
     return f_qdd3, f_qdd2, f_energy, f_kinetic, f_impact_ks, f_impact_hs
 
@@ -543,13 +546,14 @@ def test_kneestrike_already_locked_is_identity():
 
 
 def test_heelstrike_swaps_and_dissipates():
-    """heel-strike: 脚交換幾何 + KE 非増加 + 新 swing 整列。"""
+    """heel-strike: 脚交換幾何 + KE 非増加 + 新 swing 整列（剛体のまま）。"""
     th = -0.18
     x_pre = np.array([th, -th, -th, -1.4, -0.9, -0.9])  # locked, strike 面上
     x_post = heelstrike_map(x_pre, P)
     assert x_post[0] == -th          # 新 stance = 旧 swing 角
     assert x_post[1] == th           # 新 swing 大腿 = 旧 stance 角
     assert x_post[2] == th           # 新 swing 脛も整列
+    assert x_post[4] == x_post[5]    # 衝突中は剛体: θ̇_th⁺ = θ̇_sh⁺
     assert kinetic_energy(x_post, P) < kinetic_energy(x_pre, P)
 
 
@@ -572,9 +576,11 @@ def kneestrike_map(x: np.ndarray, p: KneedParams) -> np.ndarray:
 
 
 def heelstrike_map(x: np.ndarray, p: KneedParams) -> np.ndarray:
-    """heel-strike: 脚交換 + 新 swing 膝アンロック。post 速度は post ラベル。"""
+    """heel-strike: 脚交換。衝突中は両脚剛体（膝ロック維持、Hsu Chen 2007 /
+    McGeer の機械式ロックと整合）。アンロックは次相開始時 = post で
+    θ̇_th⁺ = θ̇_sh⁺。post 速度は post ラベル。"""
     wq = _build()[5](*_args(x, p))
-    return np.array([x[1], x[0], x[0], float(wq[0]), float(wq[1]), float(wq[2])])
+    return np.array([x[1], x[0], x[0], float(wq[0]), float(wq[1]), float(wq[1])])
 ```
 
 - [ ] **Step 4: テスト確認 + Commit**
@@ -600,8 +606,8 @@ git commit -m "feat: kneed walker knee-strike and heel-strike impact maps"
 def make_kneed(p: KneedParams) -> HybridModel:
     """相機械: unlocked → knee-strike → locked → heel-strike。
 
-    断面 = heel-strike 直後。y = (θ_st, θ̇_st, θ̇_th, θ̇_sh)、
-    位置は θ_th = θ_sh = −θ_st が成立。
+    断面 = heel-strike 直後。y = (θ_st, θ̇_st, θ̇_sw) の 3 次元
+    （位置 θ_th = θ_sh = −θ_st、速度 θ̇_th = θ̇_sh = θ̇_sw が成立）。
     heel-strike 受理は compass と同じ閉形式（脚全長 l で
     ẏ_sw = −l sin(θ_st)(θ̇_st + θ̇_sw) < 0、locked 相では θ̇_sw = x[4]）。
     """
@@ -619,8 +625,8 @@ def make_kneed(p: KneedParams) -> HybridModel:
     )
     return HybridModel(
         phases=(unlocked, locked),
-        lift=lambda y: np.array([y[0], -y[0], -y[0], y[1], y[2], y[3]]),
-        project=lambda x: np.array([x[0], x[3], x[4], x[5]]),
+        lift=lambda y: np.array([y[0], -y[0], -y[0], y[1], y[2], y[2]]),
+        project=lambda x: np.array([x[0], x[3], x[4]]),
     )
 ```
 
@@ -743,12 +749,13 @@ def test_heelstrike_reduces_to_compass():
 
 
 def test_full_cycle_reduces_to_compass():
-    """退化 kneed の全 stride 不動点が compass 不動点 (Phase 2 実測) に一致。"""
+    """退化 kneed の全 stride 不動点が compass 不動点 (Phase 2 実測) に一致。
+
+    断面はどちらも 3D (θ_st, θ̇_st, θ̇_sw) で同型。"""
     model = make_kneed(P_DEG)
     fp_c = find_limit_cycle(C_MODEL, np.array(gref.SECTION_GUESS))
     assert fp_c.converged
-    guess = np.array([fp_c.y[0], fp_c.y[1], fp_c.y[2], fp_c.y[2]])
-    fp_k = find_limit_cycle(model, guess)
+    fp_k = find_limit_cycle(model, fp_c.y.copy())
     assert fp_k.converged
     assert np.isclose(fp_k.y[0], fp_c.y[0], atol=1e-5)
     assert np.isclose(fp_k.y[1], fp_c.y[1], atol=1e-4)
