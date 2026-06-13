@@ -28,7 +28,7 @@
 - [#2](https://github.com/nyasuto/crane/issues/2) walk_simplest.py: 不安定サイクル収束時の警告 (max|λ|>1、γ=0.02 で λ=5.4 の実例)
 - [#3](https://github.com/nyasuto/crane/issues/3) period-doubling カスケード探索 (γ → 0.0151+、Garcia Sec. 5.2-5.3)
 
-## Phase 2: sympy 導出レイヤー + Compass Gait (Goswami 点足系) — 実装完了、歩容判定待ち
+## Phase 2: sympy 導出レイヤー + Compass Gait (Goswami 点足系) — 完了 (2026-06-13)
 
 - [x] HybridModel プロトコル refactor: stride/search を model 非依存化（挙動変更なし）
 - [x] derive/lagrange.py: Euler-Lagrange 自動導出。二重振り子の教科書 EOM と 1e-15 一致、Noether 保存 6e-15（tests/test_derive_lagrange.py に恒久化）
@@ -41,7 +41,7 @@
 - [x] **period-doubling カスケード再現**: period-1 不安定化 4.40°（文献 4.37°、分解能 0.05° 内）、period-2 branch 4.40°–5.95° 追跡、period-2 不安定化 ~4.95°（文献の第2分岐 4.9°）。flip bifurcation（実固有値が −1 通過）確認
 - [x] viz model 非依存化 + walk_compass.py: 30歩で deviation 6.7e-3 → 5.3e-10
 - [x] テスト 41 本全 green (commit ac66731)
-- [ ] **ぽんぽこ殿の歩容判定**: walk.mp4 が「歩行」に見える
+- [x] **ぽんぽこ殿の歩容判定**: walk.mp4 が「歩行」に見える（2026-06-13 合格判定）
 
 ### Phase 2 で得た知見
 
