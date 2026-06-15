@@ -40,15 +40,16 @@ def _build():
     def down(theta):
         return sp.Matrix([sp.sin(theta), -sp.cos(theta)])
 
-    C_st = sp.Matrix([-R * th_st, R])
-    hip = C_st - (L - R) * down(th_st)
+    C_st = sp.Matrix([-R * th_st, R])  # stance 円弧足の曲率中心（高さ R、転がりで C_x=-R*th_st）
+    hip = C_st - (L - R) * down(th_st)  # R→0 で [-L sinθ, L cosθ] = 点足 compass の hip
+    # 各脚 = hip から距離 c±ρ の 2 質点（m/2 ずつ）。総質量 m・CoM 位置 c・慣性 mρ² を再現
     p_st1 = hip + (c - rho) * down(th_st)
     p_st2 = hip + (c + rho) * down(th_st)
     p_sw1 = hip + (c - rho) * down(th_sw)
     p_sw2 = hip + (c + rho) * down(th_sw)
-    C_sw = hip + (L - R) * down(th_sw)
-    foot_sw_contact = sp.Matrix([C_sw[0], 0])
-    P_st = sp.Matrix([-R * th_st, 0])
+    C_sw = hip + (L - R) * down(th_sw)  # swing 円弧足の曲率中心
+    foot_sw_contact = sp.Matrix([C_sw[0], 0])  # strike 時の swing 接触点（衝突 pivot）
+    P_st = sp.Matrix([-R * th_st, 0])  # stance 接触点
 
     bodies = [
         (m_h, hip),
