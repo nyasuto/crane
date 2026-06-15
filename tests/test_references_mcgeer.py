@@ -10,3 +10,5 @@ def test_mcgeer_references_are_filled():
     assert 0.0 < ref.GAMMA_GAIT < 0.3
     assert len(ref.SECTION_GUESS) == 3  # (θ_st, θ̇_st, θ̇_sw)
     assert isinstance(ref.PUBLISHED_STABLE, bool)
+    # §5 直脚モデルには印刷固有値が無い（Table 1 は膝あり test machine）— None を固定
+    assert ref.POINCARE_EIGENVALUES is None

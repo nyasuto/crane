@@ -107,7 +107,7 @@ PROVENANCE = (
 M_LEG: float = 1.0  # 脚質量。原典: "changing m ... doesn't change the gait"(p72) → 1.0 正規化
 M_HIP: float = 0.0  # m_h（hip 点質量）。§5 nominal は hip 質量なし（Fig.12 で別途掃引）
 # C_HIP_TO_COM = L − c_paper = 1 − 0.63（原典 c は床からの CoM 高さ。docstring 参照）
-C_HIP_TO_COM: float = 0.37  # [m]（hip→脚 CoM 距離 / l）
+C_HIP_TO_COM: float = 0.37  # 無次元（hip→脚 CoM 距離 / l。L_LEG=1 なので [m] と同値）
 RHO_GYR: float = 0.32  # r_gyr（脚 CoM 回りの回転半径 / l。Fig. 8/9/10 凡例に印刷）
 L_LEG: float = 1.0  # l（脚長 = hip→接地点。無次元化基準）
 R_FOOT: float = 0.3  # R（足裏円弧半径 / l。Fig. 10 凡例の nominal 固定値として印刷）
@@ -119,7 +119,7 @@ ALPHA_HALF_INTERLEG: float = 0.3  # α_0 [rad]
 W_OFFSET: float = 0.0
 
 # 公表 gait の斜面: R=0.3 nominal に対応する slope を Fig. 8（SLOPE γ vs R）から digitize
-GAMMA_GAIT: float = 0.030  # [rad]（≈1.7%。図読み取り ±10%。docstring 参照）
+GAMMA_GAIT: float = 0.030  # [rad]（≈1.72°、勾配 tan≈3.0%。図読み取り ±10%。docstring 参照）
 
 # 断面 y = (θ_st, θ̇_st, θ̇_sw) の初期推定（衝突直後）。出所:
 #   McGeer は不動点状態ベクトルを印刷していない（gait は Fig. 8/9 の曲線のみ）。
