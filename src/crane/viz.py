@@ -108,6 +108,109 @@ def animate_walk(
     plt.close(fig)
 
 
+def rocker_joints(x: np.ndarray, L: float, R: float, contact_x: float):
+    """rocker compass の関節座標（slope frame）。stance 接触点を (contact_x, 0) に。
+
+    返り値: (stance_contact, stance_C, hip, swing_C, swing_lowest)
+    """
+    th_st, th_sw = x[0], x[1]
+
+    def down(theta):
+        return np.array([np.sin(theta), -np.cos(theta)])
+
+    C_st = np.array([contact_x, R])
+    hip = C_st - (L - R) * down(th_st)
+    C_sw = hip + (L - R) * down(th_sw)
+    swing_lowest = C_sw + np.array([0.0, -R])
+    return np.array([contact_x, 0.0]), C_st, hip, C_sw, swing_lowest
+
+
+def _arc_foot(center: np.ndarray, theta: float, R: float, rot: np.ndarray, n: int = 24):
+    """曲率中心 center・半径 R の円弧足を polyline でサンプル（脚軸 down(θ) を中心に半円弧）。
+
+    脚軸方向（θ=0 で接地点が真下）を中心に ±90° の半円弧を描いて足裏の丸みを見せる。
+    rot で −γ 回転して返す。
+    """
+    base = np.arctan2(-np.cos(theta), np.sin(theta))  # down(θ) 方向の角度（+x から）
+    angs = base + np.linspace(-np.pi / 2, np.pi / 2, n)
+    pts = center[:, None] + R * np.array([np.cos(angs), np.sin(angs)])
+    return rot @ pts
+
+
+def animate_rocker(
+    strides: list[StrideResult],
+    L: float,
+    R: float,
+    gamma: float,
+    out: Path,
+    fps: int = 30,
+) -> None:
+    """rocker-foot compass の stick-figure アニメ（slope frame、−γ 回転）。
+
+    stance 脚（hip→曲率中心 C_st、青）と swing 脚（hip→C_sw、橙）を描き、各脚先に
+    半径 R の円弧足を polyline で描いて丸足の転がりを見せる。
+
+    点足 compass/kneed と違い、円弧足は step 内で接地点が転がって移動する
+    （モデルでは P_st_x = −R·θ_st）。各フレームで rolling-without-slip
+    Δcontact = −R·Δθ_st を累積して stance 接触 x を更新し、丸足が脚の下を
+    前転する様子を描く（R→0 で転がり項が消え点足と一致）。heel-strike 時には
+    着地ジオメトリ（x_strike, leg-swap 前）の swing 円弧足の接地 x（曲率中心
+    C_sw の真下＝C_sw_x）を次 step の開始 contact_x にして滑らかに連結する。
+    """
+    rot = np.array([[np.cos(-gamma), -np.sin(-gamma)], [np.sin(-gamma), np.cos(-gamma)]])
+
+    frames: list[tuple[np.ndarray, ...]] = []
+    contact_x = 0.0
+    dt_frame = 1.0 / fps
+    for s in strides:
+        t_resampled = np.append(np.arange(0.0, s.t[-1], dt_frame), s.t[-1])
+        q0_i = np.interp(t_resampled, s.t, s.x[0])
+        q1_i = np.interp(t_resampled, s.t, s.x[1])
+        prev_q0 = None
+        for q0, q1 in zip(q0_i, q1_i):
+            # step 内の転がり: Δcontact = −R·Δθ_st（rolling-without-slip）を累積
+            if prev_q0 is not None:
+                contact_x += -R * (float(q0) - prev_q0)
+            prev_q0 = float(q0)
+            _, C_st, hip, C_sw, _ = rocker_joints(np.array([q0, q1, 0, 0]), L, R, contact_x)
+            st_foot = _arc_foot(C_st, float(q0), R, rot)
+            sw_foot = _arc_foot(C_sw, float(q1), R, rot)
+            frames.append((rot @ C_st, rot @ hip, rot @ C_sw, st_foot, sw_foot))
+        # heel-strike 着地ジオメトリ（leg-swap 前）の swing 円弧足の接地 x を次 step の
+        # 開始 contact_x に。最後のフレームまで転がした contact_x で C_sw_x を評価して連結。
+        _, _, _, C_sw_s, _ = rocker_joints(s.x_strike, L, R, contact_x)
+        contact_x = float(C_sw_s[0])
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    (stance_line,) = ax.plot([], [], "o-", lw=2, color="tab:blue")
+    (swing_line,) = ax.plot([], [], "o-", lw=2, color="tab:orange")
+    (stance_foot,) = ax.plot([], [], "-", lw=2.5, color="tab:blue")
+    (swing_foot,) = ax.plot([], [], "-", lw=2.5, color="tab:orange")
+    span = max(contact_x + 2.0, 4.0)
+    ground = rot @ np.array([[-1.0, span], [0.0, 0.0]])
+    ax.plot(ground[0], ground[1], "k-", lw=1)
+    ax.set_xlim(-1.0, span)
+    ax.set_ylim(-span * np.sin(gamma) - 0.5, 1.5)
+    ax.set_aspect("equal")
+
+    def update(i: int):
+        C_st, hip, C_sw, st_foot, sw_foot = frames[i]
+        stance_line.set_data([hip[0], C_st[0]], [hip[1], C_st[1]])
+        swing_line.set_data([hip[0], C_sw[0]], [hip[1], C_sw[1]])
+        stance_foot.set_data(st_foot[0], st_foot[1])
+        swing_foot.set_data(sw_foot[0], sw_foot[1])
+        return stance_line, swing_line, stance_foot, swing_foot
+
+    anim = animation.FuncAnimation(fig, update, frames=len(frames), blit=True)
+    try:
+        anim.save(out, writer=animation.FFMpegWriter(fps=fps))
+    except (FileNotFoundError, RuntimeError):
+        # ffmpeg が無い環境では GIF にフォールバック
+        out = out.with_suffix(".gif")
+        anim.save(out, writer=animation.PillowWriter(fps=fps))
+    plt.close(fig)
+
+
 def kneed_joints(x: np.ndarray, l_t: float, l_s: float, foot_x: float):
     """kneed の関節座標列（slope frame）。stance 足を (foot_x, 0) に置く。
 
