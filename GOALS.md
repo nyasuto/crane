@@ -59,5 +59,47 @@
 - search のバックトラッキングに Armijo 条件（issue #1 と同根、compass でも同じ）
 - カオス領域 (γ>5°) の Lyapunov 指数 / period-4, 8 の追跡（Phase 2.5 候補）
 
-## Phase 3: Kneed Walker (McGeer 1990)
-Phase 2 完了後。
+## Phase 3: Kneed Walker (点足, Hsu Chen 2007) — 実装完了 (2026-06-15、歩容判定待ち)
+
+足形状 = 点足（ぽんぽこ殿決定 2026-06-13。rocker foot は Phase 4 候補）。
+4相 hybrid: unlocked swing (3 DOF) → knee-strike → locked swing (2 DOF) → heel-strike。
+状態は全相 6D 統一 `x = [θ_st, θ_th, θ_sh, θ̇_st, θ̇_th, θ̇_sh]`、断面は heel-strike 直後の 3D
+`y = (θ_st, θ̇_st, θ̇_sw)`。
+
+- [x] 相機械への refactor: PhaseSpec 列 + stride 一般化（simplest/compass は挙動不変、全 green）
+- [x] 文献値の provenance 付き記録 (references_kneed.py): Hsu Chen 2007 MIT 修論 Ch.3 から取得。
+  パラメータ・座標規約・衝突定式化を記号比較で照合（Table 3.1 と全パラメータ一致、heel-strike は
+  原典 eq 3.5 = rigid-through-collision と一致）
+- [x] derive レイヤーで両相力学を記号導出 (kneed.py): 平衡・unlocked/locked 相のエネルギー保存
+  (drift < 1e-7)・locked 相の θ_th≡θ_sh 維持を不変量テストで確認
+- [x] 衝突写像 (knee-strike / heel-strike): 位置不変・速度ロック・KE 散逸・脚交換幾何・剛体保持・
+  零速度不動点を不変量テストで確認
+- [x] **compass 退化ゲート**: m_s→1e-9 で locked 力学・heel-strike・全 stride 不動点・上位2固有値が
+  Phase 2 検証済み compass (0.27103, −1.09238, −0.37737) に一致 — 記号導出レイヤーの最強検証
+- [x] **Kneed リミットサイクル発見** (γ=0.0504 rad): y*=(0.23859, −1.10959, −0.05715)、
+  Newton 残差 5e-14（4反復）。q1=0.1882（文献 0.1877、0.27%）、q̇1=−1.1096（文献 −1.1014、0.7%）、
+  step period 0.5643s（文献図読取 0.559、1.0%）、heel-strike 直前 stance 角 −0.2386（文献 −0.2380、0.25%）
+- [x] **安定性**: Jacobian multiplier 0.655, 0.655, 0.144（複素対 0.353±0.552i + 実 0.144）、
+  max|λ|=0.655 < 1 で漸近安定。文献 Sec.3.3.1 の locally stable 記述と整合
+- [x] gait family continuation: 公表 slope の 0.8 倍まで追跡
+- [x] viz 4セグメント + walk_kneed.py: 12歩で deviation 9.7e-3 → 1.5e-4、膝屈曲 ~30°/stride 観察可能
+- [x] テスト 63 本全 green
+- [ ] **ぽんぽこ殿の歩容判定**: walk.mp4 が「歩行」に見える（膝の屈曲込み）
+
+### Phase 3 で得た知見
+
+- 文献固有値が「Jacobian 有限差分」でなく「摂動軌道の最小二乗推定」のことがある（Hsu Chen は
+  25 軌道×10s の least-squares で 0.405 を得た）。本実装の Jacobian 値 0.655 とは差があるが、
+  原典が「参考値」と位置づけており両者とも安定。固有値ゲートは自前数値で確定する流儀が正しい
+- 零近傍の速度成分（θ̇_sw: 本実装 −0.057 vs 文献 −0.040）は固定刻み前進積分（原典 dt=1e-3）の
+  バイアスが出やすい。確信を持って印刷された量（q1, q̇1, interleg 角, step period）は全て <1% 一致
+- heel-strike の 3 本目（新 swing 脛速度）は rigid-through-collision (θ̇_sh⁺=θ̇_th⁺) が McGeer の
+  機械式ロック物理と整合。当初案の「脛を knee 回りで独立保存」は不採用（references_kneed.py 参照）
+- 退化ゲート (massless shank) は記号導出レイヤーの検証として極めて有効。knee-strike 撃力→0、
+  脛が slave 振り子になり、Phase 2 検証済み compass に厳密一致する
+
+### 今後の課題
+
+- rocker foot 化（McGeer 1990 原機械、Phase 4 候補）
+- search のバックトラッキングに Armijo 条件（issue #1 と同根）
+- 物理エンジン (MuJoCo) 再現と basin 可視化（Phase 4、設計上スコープ外・記録のみ）
