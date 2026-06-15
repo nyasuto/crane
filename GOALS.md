@@ -105,7 +105,7 @@
 - search のバックトラッキングに Armijo 条件（issue #1 と同根）
 - 物理エンジン (MuJoCo) 再現と basin 可視化（Phase 4、設計上スコープ外・記録のみ）
 
-## Phase 3.5: Rocker-foot Compass (McGeer 1990a) — 完了 (2026-06-16、歩容判定待ち)
+## Phase 3.5: Rocker-foot Compass (McGeer 1990a) — 完了 (2026-06-16)
 
 円弧足（半径 R の round foot）2D compass を記号導出レイヤーで実装。剛体脚を
 2点質量（m/2 を hip 距離 c±ρ に配置）で表現することで質量・CoM・慣性を再現し、
@@ -127,7 +127,7 @@
 - [x] R-continuation: gait family を R=0.30→0.24→0.18→0.12 まで追跡、全て収束・安定
 - [x] walk_rocker.py: 30歩で deviation 3.95e-3 → 8.5e-14（リミットサイクル収束）
 - [x] テスト 77 本全 green
-- [ ] **ぽんぽこ殿の歩容判定**: walk.mp4 が「円弧足で転がりながら歩く」ように見える
+- [x] **ぽんぽこ殿の歩容判定**: walk.mp4 が「円弧足で転がりながら歩く」ように見える（2026-06-16 合格判定）
 
 ### Phase 3.5 で得た知見
 
