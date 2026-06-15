@@ -78,17 +78,21 @@ def find_limit_cycle(
         J = _jacobian(model, y, n_strides=n_strides)
         return FixedPoint(y=y, eigenvalues=np.linalg.eigvals(J), converged=True, history=history)
 
+    c_armijo = 1e-4  # Armijo 十分減少係数
     for _ in range(max_iter - 1):
+        cur_norm = float(np.linalg.norm(img - y))
         J = _jacobian(model, y, n_strides=n_strides)
         # Newton 更新: F(y) = S(y) - y = 0 → (J_S - I) * Δy = S(y) - y → y_new = y - Δy
         step = np.linalg.solve(J - np.eye(y.size), img - y)
 
-        # バックトラッキングライン探索: バスン外のステップを縮小する
+        # バックトラッキングライン探索: バスン外、または残差が十分減少しない
+        # ステップ（Armijo: ‖F(y_new)‖ ≤ (1 − c·α)‖F(y)‖ を満たさない）を縮小する。
+        # これで残差増加ステップを排除し、収束をロバストにする (issue #1)。
         alpha = 1.0
         y_new = y - alpha * step
         new_img, new_norm = _try_poincare(model, y_new, n_strides=n_strides)
         for _ in range(10):
-            if new_img is not None:
+            if new_img is not None and new_norm <= (1.0 - c_armijo * alpha) * cur_norm:
                 break
             alpha *= 0.5
             y_new = y - alpha * step

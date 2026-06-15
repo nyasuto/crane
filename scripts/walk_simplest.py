@@ -44,6 +44,10 @@ def main() -> None:
         )
         sys.exit(1)
 
+    lam = np.abs(fp.eigenvalues)
+    if lam.max() > 1.0:
+        print(f"WARNING: cycle is UNSTABLE (max|lambda|={lam.max():.3f}) — walk will fall")
+
     # 不動点からわずかに摂動した初期条件で多歩シミュ（basin 内なら収束するはず）
     y0 = fp.y * (1.0 + args.perturb)
     x = lift(y0[0], y0[1])
@@ -65,7 +69,8 @@ def main() -> None:
     meta = {
         "params": {"gamma": p.gamma},
         "fixed_point": fp.y.tolist(),
-        "eigenvalues_abs": np.abs(fp.eigenvalues).tolist(),
+        "eigenvalues_abs": lam.tolist(),
+        "stable": bool(lam.max() < 1.0),
         "n_strides_completed": len(strides),
         "perturb": args.perturb,
     }
