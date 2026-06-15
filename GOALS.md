@@ -104,3 +104,43 @@
 - rocker foot 化（McGeer 1990 原機械、Phase 4 候補）
 - search のバックトラッキングに Armijo 条件（issue #1 と同根）
 - 物理エンジン (MuJoCo) 再現と basin 可視化（Phase 4、設計上スコープ外・記録のみ）
+
+## Phase 3.5: Rocker-foot Compass (McGeer 1990a) — 完了 (2026-06-16、歩容判定待ち)
+
+円弧足（半径 R の round foot）2D compass を記号導出レイヤーで実装。剛体脚を
+2点質量（m/2 を hip 距離 c±ρ に配置）で表現することで質量・CoM・慣性を再現し、
+既存の点質量 derive レイヤーを**そのまま再利用**。stance 円弧足は転がり接触
+（曲率中心 C=[−R·θ_st, R]）。R→0 で点足 compass に退化する。
+
+- [x] 文献値の provenance 付き記録 (references_mcgeer.py): McGeer, T. (1990)
+  "Passive Dynamic Walking", IJRR 9(2):62–82, §5 straight-leg round-foot model。
+  パラメータ m=1.0, m_h=0.0, c=0.37, ρ=0.32, L=1.0, R=0.3, γ=0.030 rad（図読取 ±10%）
+- [x] derive レイヤーで round-foot 力学を記号導出 (dynamics)・衝突写像 (impact)・
+  4D stride を実装。不変量テスト（エネルギー保存・転がり接触・脚交換）全 pass
+- [x] **R→0 退化ゲート（最強検証）**: R→1e-9, ρ→1e-9, c=b で全 stride 不動点・固有値が
+  Phase 2 検証済み点足 compass (0.27103, −1.09238, −0.37737) に一致（不動点 ~1e-10 / 固有値 ~1e-8）
+- [x] **Rocker リミットサイクル発見** (γ=0.030, R=0.3): y*=(0.30844, −1.26256, −0.87914)、
+  references SECTION_GUESS から Newton 収束。step period 0.8417s（McGeer 2.5·√(l/g)=0.7982s、5.45%、±10% 内）
+- [x] **安定性**: 固有値 0.4316 と複素対 −0.1529±0.2986j（大きさ 0.4316, 0.3355, 0.3355）、
+  max|λ|=0.4316 < 1 で漸近安定。McGeer Fig.9 と整合（公称質量配置は点足では不安定、R=0.3 の円弧足で安定化）
+- [x] **独立傍証（ゲート外）**: strike 時の half-interleg 角 |θ_st|=0.308 ≈ McGeer 印刷値 α₀=0.30
+- [x] R-continuation: gait family を R=0.30→0.24→0.18→0.12 まで追跡、全て収束・安定
+- [x] walk_rocker.py: 30歩で deviation 3.95e-3 → 8.5e-14（リミットサイクル収束）
+- [x] テスト 77 本全 green
+- [ ] **ぽんぽこ殿の歩容判定**: walk.mp4 が「円弧足で転がりながら歩く」ように見える
+
+### Phase 3.5 で得た知見
+
+- 円弧足の静的平衡角 ≠ γ（接触点 P_st=[−R·θ,0] が θ とともに動くため）。R→0 で初めて γ に近づく。
+  点足モデル由来の素朴な「θ=γ が不動点」チェックは転がり足では誤り
+- 剛体脚を 2 点質量（m/2 を CoM±ρ に配置）で表すと質量・CoM・慣性を再現でき、
+  既存の点質量 derive レイヤーを**改変なし**で流用できる。回転慣性を加えるクリーンな手法
+- McGeer の印刷固有値（Table 1: 0.70/−0.05/−0.83）は kneed テスト機械のもので、§5 straight-leg
+  モデルの値ではない（後者は Fig.9 の locus のみで数値固有値の印刷なし）。
+  ゆえに固有値ゲートは reference-only (POINCARE_EIGENVALUES=None)、ゲートは存在性・安定性・step period・R→0 退化
+
+### 今後の課題
+
+- kneed + rocker = McGeer 1990b 原機械の完全再現（Phase 3 + Phase 3.5 の合流、次候補）
+- search のバックトラッキングに Armijo 条件（issue #1 と同根）
+- 物理エンジン (MuJoCo) 再現と basin 可視化（設計上スコープ外・記録のみ）

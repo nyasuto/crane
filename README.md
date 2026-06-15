@@ -74,6 +74,35 @@ stride 0:  deviation 9.7e-3  knee_flexion_max 30.0deg
 stride 11: deviation 1.6e-4  knee_flexion_max 29.9deg   ← リミットサイクル収束
 ```
 
+## Phase 3.5 の結果 (McGeer 1990a Rocker-foot Compass, γ = 0.030, R = 0.3)
+
+円弧足（半径 R の round foot）2D compass。剛体脚を 2点質量（m/2 を hip 距離 c±ρ に配置）で
+表現し、既存の点質量 derive レイヤーをそのまま再利用。stance 円弧足は転がり接触
+（曲率中心 C=[−R·θ_st, R]）。R→0 で点足 compass に退化。
+
+| 量 | 本実装 | 文献 (McGeer IJRR 9(2), §5) | 差 |
+|------|--------|-----------------------------|-----|
+| q* = (θ_st, θ̇_st, θ̇_sw) | (0.30844, −1.26256, −0.87914) | — | — |
+| step period | 0.8417 s | 2.5·√(l/g) = 0.7982 s | 5.45%（±10% 内）|
+| strike 時 half-interleg 角 \|θ_st\| | 0.308 | α₀ = 0.30 | 傍証（ゲート外）|
+| 安定性 max\|λ\| | **0.4316 < 1（安定）** | Fig.9（R=0.3 で安定化）と整合 | — |
+
+固有値は 0.4316 と複素対 −0.1529±0.2986j（大きさ 0.4316, 0.3355, 0.3355）。
+McGeer §5 straight-leg モデルには印刷数値固有値がない（Table 1 は kneed テスト機械）ため、
+固有値ゲートは reference-only、ゲートは存在性・安定性・step period・R→0 退化。
+
+**R→0 退化ゲート（最強検証）**: R→1e-9, ρ→1e-9, c=b で全 stride 不動点・固有値が
+Phase 2 検証済み点足 compass (0.27103, −1.09238, −0.37737) に一致（不動点 ~1e-10 / 固有値 ~1e-8）。
+
+**R-continuation**: gait family を R=0.30→0.24→0.18→0.12 まで追跡、全て収束・安定。
+
+デモ実行 (摂動から 30 歩、収束):
+
+```
+stride 0:  deviation 3.95e-3
+stride 29: deviation 8.5e-14   ← リミットサイクル収束
+```
+
 ## セットアップ
 
 ```bash
@@ -97,7 +126,10 @@ uv run python scripts/bifurcation_compass.py [--gamma-max-deg 6.0] [--step-deg 0
 # Phase 3 デモ歩行: 点足 Kneed Walker（4セグメント walk.mp4 + phase_portrait.png + meta.json）
 uv run python scripts/walk_kneed.py [--gamma-deg <published>] [--strides 30] [--perturb 0.005]
 
-# テスト（63 tests）
+# Phase 3.5 デモ歩行: 円弧足 Rocker-foot Compass（walk.mp4 + phase_portrait.png + meta.json）
+uv run python scripts/walk_rocker.py [--gamma-deg <published>] [--strides 30] [--perturb 0.005]
+
+# テスト（77 tests）
 uv run pytest
 ```
 
