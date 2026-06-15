@@ -59,7 +59,7 @@
 - search のバックトラッキングに Armijo 条件（issue #1 と同根、compass でも同じ）
 - カオス領域 (γ>5°) の Lyapunov 指数 / period-4, 8 の追跡（Phase 2.5 候補）
 
-## Phase 3: Kneed Walker (点足, Hsu Chen 2007) — 実装完了 (2026-06-15、歩容判定待ち)
+## Phase 3: Kneed Walker (点足, Hsu Chen 2007) — 完了 (2026-06-15)
 
 足形状 = 点足（ぽんぽこ殿決定 2026-06-13。rocker foot は Phase 4 候補）。
 4相 hybrid: unlocked swing (3 DOF) → knee-strike → locked swing (2 DOF) → heel-strike。
@@ -84,7 +84,8 @@
 - [x] gait family continuation: 公表 slope の 0.8 倍まで追跡
 - [x] viz 4セグメント + walk_kneed.py: 12歩で deviation 9.7e-3 → 1.5e-4、膝屈曲 ~30°/stride 観察可能
 - [x] テスト 63 本全 green
-- [ ] **ぽんぽこ殿の歩容判定**: walk.mp4 が「歩行」に見える（膝の屈曲込み）
+- [x] **ぽんぽこ殿の歩容判定**: walk.mp4 が「歩行」に見える（膝の屈曲込み）。
+  「歩行が素晴らしく自然で、膝を使っている」と合格判定（2026-06-15）
 
 ### Phase 3 で得た知見
 
