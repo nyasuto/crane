@@ -148,8 +148,14 @@ def animate_rocker(
     """rocker-foot compass の stick-figure アニメ（slope frame、−γ 回転）。
 
     stance 脚（hip→曲率中心 C_st、青）と swing 脚（hip→C_sw、橙）を描き、各脚先に
-    半径 R の円弧足を polyline で描いて丸足の転がりを見せる。stance 接触アンカーは
-    heel-strike 時（x_strike）の swing 円弧足の転がり接地 x で前進させる。
+    半径 R の円弧足を polyline で描いて丸足の転がりを見せる。
+
+    点足 compass/kneed と違い、円弧足は step 内で接地点が転がって移動する
+    （モデルでは P_st_x = −R·θ_st）。各フレームで rolling-without-slip
+    Δcontact = −R·Δθ_st を累積して stance 接触 x を更新し、丸足が脚の下を
+    前転する様子を描く（R→0 で転がり項が消え点足と一致）。heel-strike 時には
+    着地ジオメトリ（x_strike, leg-swap 前）の swing 円弧足の接地 x（曲率中心
+    C_sw の真下＝C_sw_x）を次 step の開始 contact_x にして滑らかに連結する。
     """
     rot = np.array([[np.cos(-gamma), -np.sin(-gamma)], [np.sin(-gamma), np.cos(-gamma)]])
 
@@ -160,13 +166,18 @@ def animate_rocker(
         t_resampled = np.append(np.arange(0.0, s.t[-1], dt_frame), s.t[-1])
         q0_i = np.interp(t_resampled, s.t, s.x[0])
         q1_i = np.interp(t_resampled, s.t, s.x[1])
+        prev_q0 = None
         for q0, q1 in zip(q0_i, q1_i):
+            # step 内の転がり: Δcontact = −R·Δθ_st（rolling-without-slip）を累積
+            if prev_q0 is not None:
+                contact_x += -R * (float(q0) - prev_q0)
+            prev_q0 = float(q0)
             _, C_st, hip, C_sw, _ = rocker_joints(np.array([q0, q1, 0, 0]), L, R, contact_x)
             st_foot = _arc_foot(C_st, float(q0), R, rot)
             sw_foot = _arc_foot(C_sw, float(q1), R, rot)
             frames.append((rot @ C_st, rot @ hip, rot @ C_sw, st_foot, sw_foot))
-        # heel-strike 着地ジオメトリ（leg-swap 前）の swing 円弧足の接地 x を次アンカーに。
-        # 転がり接地点は曲率中心 C_sw の真下なので C_sw_x をそのまま使う。
+        # heel-strike 着地ジオメトリ（leg-swap 前）の swing 円弧足の接地 x を次 step の
+        # 開始 contact_x に。最後のフレームまで転がした contact_x で C_sw_x を評価して連結。
         _, _, _, C_sw_s, _ = rocker_joints(s.x_strike, L, R, contact_x)
         contact_x = float(C_sw_s[0])
 

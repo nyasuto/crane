@@ -80,7 +80,6 @@ def main() -> None:
         "eigenvalues_abs": lam.tolist(),
         "stable": bool(lam.max() < 1.0),
         "n_strides_completed": len(strides),
-        "R": p.R,
         "perturb": args.perturb,
     }
     (run_dir / "meta.json").write_text(json.dumps(meta, indent=2))
