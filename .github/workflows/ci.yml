@@ -1,0 +1,37 @@
+# 品質ゲート: ruff (format/check) と pytest を PR ごとに自動実行する。
+# pytest 群は「文献の公表数値との一致」ゲートそのもの（CLAUDE.md の流儀）。
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# 同一 ref の進行中 run はキャンセルする。
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv (with cache)
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies (uv.lock 厳守)
+        run: uv sync --frozen
+
+      - name: ruff format check
+        run: uv run ruff format --check .
+
+      - name: ruff lint
+        run: uv run ruff check .
+
+      - name: pytest (文献値ゲート)
+        run: uv run pytest
