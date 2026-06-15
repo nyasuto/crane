@@ -20,6 +20,7 @@ import sympy as sp
 
 from crane.derive.impact import angular_momentum
 from crane.derive.lagrange import derive_qdd
+from crane.model import HybridModel, PhaseSpec
 
 
 @dataclass(frozen=True)
@@ -164,3 +165,24 @@ def heelstrike_map(x: np.ndarray, p: RockerKneedParams) -> np.ndarray:
     """heel-strike: 脚交換。衝突中は両脚剛体。post で θ̇_th⁺=θ̇_sh⁺。"""
     wq = _build()[5](*_args(x, p))
     return np.array([x[1], x[0], x[0], float(wq[0]), float(wq[1]), float(wq[1])])
+
+
+def make_rocker_kneed(p: RockerKneedParams) -> HybridModel:
+    """相機械: unlocked → knee-strike → locked → heel-strike（kneed と同一構造）。"""
+    unlocked = PhaseSpec(
+        dynamics=lambda t, x: dynamics_unlocked(t, x, p),
+        event_value=lambda x: x[2] - x[1],  # θ_sh − θ_th = 0 で knee-strike
+        event_accept=lambda x: True,
+        impact=lambda x: kneestrike_map(x, p),
+    )
+    locked = PhaseSpec(
+        dynamics=lambda t, x: dynamics_locked(t, x, p),
+        event_value=lambda x: x[0] + x[1],  # θ_st + θ_sw = 0 で heel-strike
+        event_accept=lambda x: x[0] < 0.0 and (x[3] + x[4]) < 0.0,
+        impact=lambda x: heelstrike_map(x, p),
+    )
+    return HybridModel(
+        phases=(unlocked, locked),
+        lift=lambda y: np.array([y[0], -y[0], -y[0], y[1], y[2], y[2]]),
+        project=lambda x: np.array([x[0], x[3], x[4]]),
+    )
