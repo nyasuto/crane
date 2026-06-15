@@ -1,0 +1,28 @@
+# Dependabot 設定: 依存と GitHub Actions の更新を自動 PR 化する。
+# docs: https://docs.github.com/code-security/dependabot/dependabot-version-updates
+version: 2
+updates:
+  # Python 依存 (pyproject.toml / uv.lock)。新依存は事前許可の流儀なので、
+  # major は個別 PR（レビュー必須）、minor/patch はまとめて 1 PR にしてノイズを抑える。
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore"
+    groups:
+      python-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions の version 更新（CI 整備後 = issue #8 で有効化される）。
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "ci"
