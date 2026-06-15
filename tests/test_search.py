@@ -56,3 +56,19 @@ def test_convergence_history_is_logged():
     residuals = [r for _, r in fp.history]
     assert len(residuals) >= 2
     assert residuals[-1] < residuals[0]
+
+
+def test_backtracking_never_increases_residual():
+    """Armijo: 残差が増加するステップは受理しない（履歴は単調非増加）。
+
+    seed = fp*0.6 は basin 内だが、素の Newton では初手で大きくオーバーシュート
+    して残差が 2.6e-2 → 1.18 へ膨張し 11 反復かかる（issue #1）。Armijo
+    十分減少条件を入れると、各ステップで残差が非増加になり収束も速くなる。
+    """
+    fp_true = np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT])
+    fp = find_limit_cycle(MODEL, fp_true * 0.6)
+    assert fp.converged
+    residuals = [r for _, r in fp.history]
+    assert len(residuals) >= 2
+    for prev, nxt in zip(residuals, residuals[1:]):
+        assert nxt <= prev, f"residual increased: {prev:.2e} -> {nxt:.2e}"
