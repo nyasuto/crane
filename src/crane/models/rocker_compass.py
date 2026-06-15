@@ -13,6 +13,7 @@ strike 面 g(x)=θ_st+θ_sw=0（両足同半径 R の幾何対称性から compa
 from dataclasses import dataclass
 from functools import lru_cache
 
+import numpy as np
 import sympy as sp
 
 from crane.derive.impact import angular_momentum
@@ -109,3 +110,9 @@ def energy(x, p: RockerCompassParams) -> float:
 
 def kinetic_energy(x, p: RockerCompassParams) -> float:
     return float(_build()[2](*_args(x, p)))
+
+
+def heelstrike_map(x: np.ndarray, p: RockerCompassParams) -> np.ndarray:
+    """衝突写像 + 脚ラベル交換。post 速度は post ラベルで返る。"""
+    wp = _build()[3](*_args(x, p))
+    return np.array([x[1], x[0], float(wp[0]), float(wp[1])])
