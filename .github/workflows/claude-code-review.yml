@@ -12,6 +12,11 @@ on:
 
 jobs:
   claude-review:
+    # Dependabot PR はレビュー対象外: Dependabot 実行にはリポジトリ secrets が
+    # 渡されず CLAUDE_CODE_OAUTH_TOKEN が空になるため認証失敗する。依存 bump に
+    # AI レビューも不要なのでスキップする（失敗ではなくスキップ扱いになる）。
+    if: github.actor != 'dependabot[bot]'
+
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
