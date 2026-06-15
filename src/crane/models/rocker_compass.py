@@ -18,6 +18,7 @@ import sympy as sp
 
 from crane.derive.impact import angular_momentum
 from crane.derive.lagrange import derive_qdd
+from crane.model import HybridModel, PhaseSpec
 
 
 @dataclass(frozen=True)
@@ -116,3 +117,18 @@ def heelstrike_map(x: np.ndarray, p: RockerCompassParams) -> np.ndarray:
     """衝突写像 + 脚ラベル交換。post 速度は post ラベルで返る。"""
     wp = _build()[3](*_args(x, p))
     return np.array([x[1], x[0], float(wp[0]), float(wp[1])])
+
+
+def make_rocker_compass(p: RockerCompassParams) -> HybridModel:
+    return HybridModel(
+        phases=(
+            PhaseSpec(
+                dynamics=lambda t, x: dynamics(t, x, p),
+                event_value=lambda x: x[0] + x[1],
+                event_accept=lambda x: x[0] < 0.0 and (x[2] + x[3]) < 0.0,
+                impact=lambda x: heelstrike_map(x, p),
+            ),
+        ),
+        lift=lambda y: np.array([y[0], -y[0], y[1], y[2]]),
+        project=lambda x: np.array([x[0], x[2], x[3]]),
+    )
