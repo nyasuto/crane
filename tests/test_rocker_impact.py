@@ -3,18 +3,20 @@ import numpy as np
 from crane.models.compass import CompassParams, heelstrike_map as compass_strike
 from crane.models.compass import dynamics as compass_dyn
 from crane.models.rocker_compass import (
-    RockerCompassParams, dynamics, heelstrike_map, kinetic_energy,
+    RockerCompassParams,
+    dynamics,
+    heelstrike_map,
+    kinetic_energy,
 )
 
-P = RockerCompassParams(m=5.0, m_h=10.0, c=0.5, rho=0.15, L=1.0, R=0.3,
-                        gamma=0.05, g=9.81)
+P = RockerCompassParams(m=5.0, m_h=10.0, c=0.5, rho=0.15, L=1.0, R=0.3, gamma=0.05, g=9.81)
 
 
 def test_heelstrike_swaps_and_dissipates():
     th = -0.18
-    x_pre = np.array([th, -th, -1.4, -0.5])   # strike 面 θ_st+θ_sw=0 上
+    x_pre = np.array([th, -th, -1.4, -0.5])  # strike 面 θ_st+θ_sw=0 上
     x_post = heelstrike_map(x_pre, P)
-    assert x_post[0] == -th          # 脚交換
+    assert x_post[0] == -th  # 脚交換
     assert x_post[1] == th
     assert kinetic_energy(x_post, P) < kinetic_energy(x_pre, P)
 
@@ -28,8 +30,7 @@ def test_heelstrike_zero_velocity_is_fixed():
 
 def test_rocker_reduces_to_compass_dynamics_and_impact():
     """R→0, ρ→0, c=b で rocker が点足 compass の力学・衝突に一致。"""
-    Pd = RockerCompassParams(m=5.0, m_h=10.0, c=0.5, rho=1e-9, L=1.0, R=1e-9,
-                             gamma=0.05, g=9.81)
+    Pd = RockerCompassParams(m=5.0, m_h=10.0, c=0.5, rho=1e-9, L=1.0, R=1e-9, gamma=0.05, g=9.81)
     Pc = CompassParams(m=5.0, m_h=10.0, a=0.5, b=0.5, gamma=0.05, g=9.81)
     rng = np.random.default_rng(0)
     for _ in range(8):
