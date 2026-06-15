@@ -26,7 +26,7 @@ def test_dynamics_reduces_to_garcia():
     for _ in range(20):
         x_g = rng.uniform([-0.3, -0.6, -2.0, -2.0], [0.3, 0.6, 2.0, 2.0])
         xdot_g = np.asarray(simplest.dynamics(0.0, x_g, P_GARCIA))
-        xdot_abs = np.asarray(MODEL.dynamics(0.0, to_abs(x_g)))
+        xdot_abs = np.asarray(MODEL.phases[0].dynamics(0.0, to_abs(x_g)))
         # 加速度を Garcia 座標に変換: θ̈=ẅ_st, φ̈=ẅ_st−ẅ_sw
         got = np.array([xdot_abs[2], xdot_abs[2] - xdot_abs[3]])
         err = np.max(np.abs(got - xdot_g[2:]))
@@ -47,7 +47,7 @@ def test_impact_reduces_to_garcia():
         phi_dot = rng.uniform(-0.5, 0.5)
         x_g_pre = np.array([theta, 2 * theta, theta_dot, phi_dot])
         expected = simplest.heelstrike_map(x_g_pre)
-        got = to_garcia(MODEL.impact(to_abs(x_g_pre)))
+        got = to_garcia(MODEL.phases[0].impact(to_abs(x_g_pre)))
         err = np.max(np.abs(got - expected))
         max_err = max(max_err, err)
         assert np.allclose(got, expected, rtol=0, atol=1e-5), (

@@ -106,3 +106,79 @@ def animate_walk(
         out = out.with_suffix(".gif")
         anim.save(out, writer=animation.PillowWriter(fps=fps))
     plt.close(fig)
+
+
+def kneed_joints(x: np.ndarray, l_t: float, l_s: float, foot_x: float):
+    """kneed の関節座標列（slope frame）。stance 足を (foot_x, 0) に置く。
+
+    状態 x = [θ_st, θ_th, θ_sh, ...]（絶対角）。stance 脚は直線（膝ロック）。
+    返り値: (stance_foot, stance_knee, hip, swing_knee, swing_foot)
+    """
+    th_st, th_th, th_sh = x[0], x[1], x[2]
+    length = l_t + l_s
+
+    def down(theta):
+        return np.array([np.sin(theta), -np.cos(theta)])
+
+    foot = np.array([foot_x, 0.0])
+    hip = foot - length * down(th_st)
+    knee_st = hip + l_t * down(th_st)
+    knee_sw = hip + l_t * down(th_th)
+    foot_sw = knee_sw + l_s * down(th_sh)
+    return foot, knee_st, hip, knee_sw, foot_sw
+
+
+def animate_kneed(
+    strides: list[StrideResult],
+    l_t: float,
+    l_s: float,
+    gamma: float,
+    out: Path,
+    fps: int = 30,
+) -> None:
+    """kneed walker の 4 セグメント stick-figure アニメ（slope frame、−γ 回転）。
+
+    stance 脚（foot–knee–hip、青）と swing 脚（hip–knee–foot、橙）の 2 本の
+    polyline。膝が屈曲する unlocked 相を含め、3 角度をそれぞれ補間して描く。
+    stance 足アンカーは heel-strike 時（x_strike）の swing 足位置で前進させる。
+    """
+    rot = np.array([[np.cos(-gamma), -np.sin(-gamma)], [np.sin(-gamma), np.cos(-gamma)]])
+
+    frames: list[tuple[np.ndarray, ...]] = []
+    foot_x = 0.0
+    dt_frame = 1.0 / fps
+    for s in strides:
+        t_resampled = np.append(np.arange(0.0, s.t[-1], dt_frame), s.t[-1])
+        q0_i = np.interp(t_resampled, s.t, s.x[0])
+        q1_i = np.interp(t_resampled, s.t, s.x[1])
+        q2_i = np.interp(t_resampled, s.t, s.x[2])
+        for q0, q1, q2 in zip(q0_i, q1_i, q2_i):
+            pts = kneed_joints(np.array([q0, q1, q2]), l_t, l_s, foot_x)
+            frames.append(tuple(rot @ p for p in pts))
+        # heel-strike 着地ジオメトリ（leg-swap 前）の swing 足 x を次アンカーに
+        pts_s = kneed_joints(s.x_strike, l_t, l_s, foot_x)
+        foot_x = float(pts_s[4][0])
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    (stance_line,) = ax.plot([], [], "o-", lw=2, color="tab:blue")
+    (swing_line,) = ax.plot([], [], "o-", lw=2, color="tab:orange")
+    span = max(foot_x + 2.0, 4.0)
+    ground = rot @ np.array([[-1.0, span], [0.0, 0.0]])
+    ax.plot(ground[0], ground[1], "k-", lw=1)
+    ax.set_xlim(-1.0, span)
+    ax.set_ylim(-span * np.sin(gamma) - 0.5, 1.5)
+    ax.set_aspect("equal")
+
+    def update(i: int):
+        foot, knee_st, hip, knee_sw, foot_sw = frames[i]
+        stance_line.set_data([foot[0], knee_st[0], hip[0]], [foot[1], knee_st[1], hip[1]])
+        swing_line.set_data([hip[0], knee_sw[0], foot_sw[0]], [hip[1], knee_sw[1], foot_sw[1]])
+        return stance_line, swing_line
+
+    anim = animation.FuncAnimation(fig, update, frames=len(frames), blit=True)
+    try:
+        anim.save(out, writer=animation.FFMpegWriter(fps=fps))
+    except (FileNotFoundError, RuntimeError):
+        out = out.with_suffix(".gif")
+        anim.save(out, writer=animation.PillowWriter(fps=fps))
+    plt.close(fig)

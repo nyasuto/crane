@@ -48,6 +48,32 @@ stride 0:  deviation 6.7e-3
 stride 29: deviation 5.3e-10   ← リミットサイクル収束
 ```
 
+## Phase 3 の結果 (Hsu Chen 2007 点足 Kneed Walker, γ = 0.0504 rad)
+
+4相 hybrid（unlocked 3-DOF → knee-strike → locked 2-DOF → heel-strike）。
+断面は heel-strike 直後の 3D `y = (θ_st, θ̇_st, θ̇_sw)`。
+
+| 量 | 本実装 | 文献 (MIT thesis Ch.3) | 差 |
+|------|--------|------------------------|-----|
+| q1 (stance 角) | 0.1882 | 0.1877 | 0.27% |
+| q̇1 | −1.1096 | −1.1014 | 0.7% |
+| step period | 0.5643 s | 0.559（図読取 ±2%）| 1.0% |
+| heel-strike 直前 stance 角 | −0.2386 | −0.2380 | 0.25% |
+| 安定性 max\|λ\| | **0.655 < 1（安定）** | locally stable と明言 | — |
+
+Newton shooting が残差 **5e-14**（4反復）で不動点 y*=(0.23859, −1.10959, −0.05715) に収束。
+固有値は複素対 0.353±0.552i と実 0.144。膝屈曲は毎 stride ~30°。
+
+**compass 退化ゲート**: shank 質量 → 0 で locked 力学・heel-strike・全 stride 不動点・上位固有値が
+Phase 2 検証済み compass (0.27103, −1.09238, −0.37737) に一致 — 記号導出レイヤーの最強検証。
+
+デモ実行 (0.5% 摂動から 12 歩、収束):
+
+```
+stride 0:  deviation 9.7e-3  knee_flexion_max 30.0deg
+stride 11: deviation 1.6e-4  knee_flexion_max 29.9deg   ← リミットサイクル収束
+```
+
 ## セットアップ
 
 ```bash
@@ -68,7 +94,10 @@ uv run python scripts/walk_compass.py [--gamma-deg 3.0] [--strides 30] [--pertur
 # Phase 2 分岐図: slope continuation + period-doubling（bifurcation.csv + bifurcation.png）
 uv run python scripts/bifurcation_compass.py [--gamma-max-deg 6.0] [--step-deg 0.05]
 
-# テスト（41 tests）
+# Phase 3 デモ歩行: 点足 Kneed Walker（4セグメント walk.mp4 + phase_portrait.png + meta.json）
+uv run python scripts/walk_kneed.py [--gamma-deg <published>] [--strides 30] [--perturb 0.005]
+
+# テスト（63 tests）
 uv run pytest
 ```
 
