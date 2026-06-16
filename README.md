@@ -103,6 +103,35 @@ stride 0:  deviation 3.95e-3
 stride 29: deviation 8.5e-14   ← リミットサイクル収束
 ```
 
+## Phase 3.6 の結果 (McGeer 1990b Rocker-foot Kneed Walker)
+
+Phase 3 点足 kneed（kneed.py、4相 hybrid）に Phase 3.5 の円弧足（半径 R の round foot
+転がり接触）を合流させた McGeer 1990b 原機械の**点質量再現**。`models/rocker_kneed.py` は
+kneed.py の _build() に 5 箇所のみの外科的変更を施したもの（derive レイヤー / kneed.py は不変）。
+
+| 量 | 本実装 | 文献 (McGeer ICRA 1990b) | 差 |
+|------|--------|--------------------------|-----|
+| y* = (θ_st, θ̇_st, θ̇_sw) | (0.35661, −1.20906, −0.54601) | — | — |
+| step period | 0.7945 s | 2.7·√(l/g) = 0.862 s | 7.84%（±15% 内）|
+| 膝屈曲 | ≈ 27.6° | — | — |
+| 固有値（大きさ）| 0.616, 0.616, 0.046 | 印刷値 0.447（4D 断面）| reference-only |
+| 安定性 max\|λ\| | **0.616 < 1（安定）** | 安定サイクルと明言 | — |
+
+不動点 y* は references SECTION_GUESS から Newton 直接収束。固有値は複素対
+0.39527±0.47248i と実 0.04579。固有値の差は分布質量（McGeer 実機）vs 点質量（本実装）+
+断面次元差（4D vs 3D）に由来する documented な reference check で、ゲートは
+存在性・安定性・step period・R→0 退化。
+
+**R→0 退化ゲート（最強検証）**: R→1e-9 で全 stride 不動点・固有値が
+Phase 3 検証済み点足 kneed (0.23859, −1.10959, −0.05715) に一致（不動点 ~1e-10 / 固有値 ~1e-8）。
+
+デモ実行 (摂動から 30 歩、収束):
+
+```
+stride 0:  deviation 5.93e-3
+stride 29: deviation 4.87e-9   ← リミットサイクル収束
+```
+
 ## セットアップ
 
 ```bash
@@ -129,7 +158,10 @@ uv run python scripts/walk_kneed.py [--gamma-deg <published>] [--strides 30] [--
 # Phase 3.5 デモ歩行: 円弧足 Rocker-foot Compass（walk.mp4 + phase_portrait.png + meta.json）
 uv run python scripts/walk_rocker.py [--gamma-deg <published>] [--strides 30] [--perturb 0.005]
 
-# テスト（77 tests）
+# Phase 3.6 デモ歩行: 円弧足 Rocker-foot Kneed Walker（4セグメント walk.mp4 + phase_portrait.png + meta.json）
+uv run python scripts/walk_rocker_kneed.py [--gamma-deg <published>] [--strides 30] [--perturb 0.005]
+
+# テスト（89 tests）
 uv run pytest
 ```
 

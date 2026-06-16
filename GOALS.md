@@ -144,3 +144,52 @@
 - kneed + rocker = McGeer 1990b 原機械の完全再現（Phase 3 + Phase 3.5 の合流、次候補）
 - search のバックトラッキングに Armijo 条件（issue #1 と同根）
 - 物理エンジン (MuJoCo) 再現と basin 可視化（設計上スコープ外・記録のみ）
+
+## Phase 3.6: Rocker-foot Kneed Walker (McGeer 1990b 原機械) — 完了 (2026-06-16、歩容判定待ち)
+
+Phase 3 点足 kneed walker（kneed.py、4相 hybrid）に Phase 3.5 の円弧足（半径 R の
+round foot 転がり接触）を合流させ、McGeer 1990b "Passive Walking with Knees" の原機械を
+点質量で再現。`models/rocker_kneed.py` = kneed.py の _build() に **5 箇所のみ**の
+外科的変更（転がり hip + 転がり接触の衝突 pivot）を施したもの。derive レイヤー /
+kneed.py / rocker_compass.py は一切改変せず。
+
+- [x] 文献値の provenance 付き記録 (references_mcgeer_knees.py): McGeer, T. (1990)
+  "Passive Walking with Knees", Proc. IEEE ICRA（6ページ会議論文）。
+  パラメータ m_h=0.6885（hip 質量 68%）, m_t=0.1, m_s=0.062, l_t=0.46, l_s=0.54,
+  b_t=0.20, b_s=0.24, R=0.20, γ=0.0456 rad
+- [x] kneed.py の _build() に 5 箇所の変更で rocker 化（転がり hip C_st=[−R·θ_st, R];
+  stance 接触 P_st; swing 円弧足接触 C_sw=knee_sw+(l_s−R)·down(θ_sh);
+  knee-strike & heel-strike の系 pivot [0,0]→P_st と foot_sw→P_sw; パラメータ R）。
+  不変量テスト（references・dynamics・impact・stride・cycle・viz）全 pass
+- [x] **R→0 退化ゲート（最強検証）**: R→1e-9 で全 stride 不動点・固有値が
+  Phase 3 検証済み点足 kneed (0.23859, −1.10959, −0.05715) に一致（不動点 ~1e-10 / 固有値 ~1e-8）。
+  unlocked/locked 力学・knee-strike・heel-strike の 4 経路すべてで一発成立
+- [x] **Rocker-kneed リミットサイクル発見** (McGeer config): y*=(0.35661, −1.20906, −0.54601)、
+  references SECTION_GUESS から Newton 直接収束。膝屈曲 ≈ 27.6°
+- [x] **安定性**: 固有値 0.39527±0.47248i と実 0.04579（大きさ 0.616, 0.616, 0.046）、
+  max|λ|=0.616 < 1 で漸近安定。McGeer の安定サイクルと整合
+- [x] **step period**: t_step=0.7945s（McGeer 2.7·√(l/g)=0.862s、7.84%、±15%（GAIT_TOLERANCE）内）。
+  McGeer 値は無次元（√(l/g)）なので換算
+- [x] walk_rocker_kneed.py: 30歩で deviation 5.93e-3 → 4.87e-9（リミットサイクル収束）
+- [x] テスト 89 本全 green（Phase 3.6 分: references・dynamics・impact・stride・R→0 退化ゲート・cycle・viz）
+- [ ] **ぽんぽこ殿の歩容判定**: walk.mp4 が「円弧足で転がりつつ膝を使って歩く」ように見える
+
+### Phase 3.6 で得た知見
+
+- 検証済みの 2 サブシステム（Phase 3 kneed + Phase 3.5 円弧足）の合流は、kneed.py の
+  _build() への **5 箇所**の外科的変更のみで済んだ（転がり hip C_st=[−R·θ_st, R]; stance 接触 P_st;
+  swing 円弧足接触 C_sw=knee_sw+(l_s−R)·down(θ_sh); knee-strike/heel-strike の系 pivot を
+  接触点へ; パラメータ R）。R→0 退化が 4 経路すべてで一発成立したのは合流設計の健全性の証左
+- 本実装の kneed は点質量モデル（Phase 3 Hsu Chen と同様）だが、McGeer 1990b の実機械は
+  分布質量脚（回転半径 ≠ 0）。ゆえにこれは McGeer 原機械の**点質量再現**であり、
+  存在性・安定性・step period・half-interleg は一致するが、印刷固有値は一致しない（reference-only）
+- McGeer 1990b は（1990a と違い）固有値を印刷しているが、4D 断面のもので本実装の 3D 断面とは
+  次元が異なる。よって配列の直接比較は不可。我々 max|λ|=0.616 vs McGeer 印刷値 0.447 の差は
+  分布質量 vs 点質量 + 断面次元差に由来する documented な reference check（ゲート外）
+
+### 今後の課題
+
+- 分布質量脚（回転半径 ρ ≠ 0）で McGeer 1990b の印刷固有値（0.447）を厳密一致させる
+  （Phase 3.5 の 2 点質量手法を kneed の各脚セグメントに適用すれば可能）
+- search のバックトラッキングに Armijo 条件（issue #1 と同根）
+- 物理エンジン (MuJoCo) 再現と basin 可視化（設計上スコープ外・記録のみ）
