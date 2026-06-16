@@ -337,7 +337,7 @@ continuation して平地サイクルを発見。
 - [x] 平地 γ=0 リミットサイクル発見 + 安定性 max|λ|<1（continuation で探索; 実測 y*=(0.3266,−0.3395), P=0.115, max|λ|=0.650）
 - [x] エネルギー収支: push-off 仕事 P²/2 = 一歩衝突損失（~1e-13）
 - [x] Kuo 2002 provenance 記録（abstract 逐語確認 "toe-off は 1/4 コスト" + power law、本文 paywall を明記）
-- [ ] **ぽんぽこ殿の目視判定**: 平地 walk.mp4 が「push-off で前進する歩行」に見える
+- [x] **ぽんぽこ殿の目視判定**: 平地 walk.mp4 が「push-off で前進する歩行」に見える（2026-06-17 合格判定）
 
 ### Phase 5a で得た知見
 - **受動には不可能だった平地歩行を pre-emptive push-off で実現**（能動歩行アークの第一段）。
