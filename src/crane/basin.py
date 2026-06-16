@@ -50,7 +50,7 @@ def classify_ic(
     return UNDECIDED
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
 class BasinResult:
     grid: np.ndarray  # (resolution, resolution) 分類コード。row=ax1, col=ax0
     ax0_vals: np.ndarray  # 横軸（axes[0]）の値
@@ -87,8 +87,10 @@ def _classify_point(point: tuple[float, float]) -> int:
             max_strides=_W["max_strides"],
             converge_tol=_W["converge_tol"],
         )
-    except Exception:
-        # 野生の初期条件では solve_ivp が StrideError 以外で落ちうる → basin 外扱い
+    except (ArithmeticError, ValueError, FloatingPointError, np.linalg.LinAlgError):
+        # 野生の初期条件では solve_ivp/impact が StrideError 以外の数値例外で
+        # 落ちうる（特異行列・定義域外など）→ basin 外扱い。プログラムバグ
+        # （KeyError/IndexError 等）は意図的に握りつぶさず伝播させる。
         return FELL
 
 
