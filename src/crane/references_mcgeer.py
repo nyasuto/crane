@@ -149,3 +149,34 @@ POINCARE_EIGENVALUES: tuple[complex, ...] | None = None
 # （枠ピクセル校正 + y 軸目盛 0.01 刻み校正、線幅・校正誤差込み）。±10% とする
 # （印刷パラメータ α_0/r_gyr/c/R は exact なので、許容は主に digitized 量に効く）。
 GAIT_TOLERANCE: float = 0.10
+
+# --- rimless wheel = 最簡受動歩行モデル（issue #19 / Phase 4a.1 の概念的支柱）---
+# McGeer, T. (1990) "Passive Dynamic Walking", IJRR 9(2):62-82。
+# 一次資料（本文）取得状況: McGeer1990 の本文は scanned PDF（テキスト層なし、
+#   https://www.cs.cmu.edu/~cga/legs/McGeer1990.pdf）でこの Task では WebFetch が
+#   timeout し、新規にテキスト抽出できなかった。本ファイル docstring 記載のとおり
+#   過去フェーズで page images から §4 "synthetic wheel"（剛体スポーク車輪を斜面で
+#   転がす）を直脚 biped の前段モデルとして読んでいるが、本 Task では一次本文を
+#   再取得できていない。
+# 取得日: 2026-06-16
+# 確認した記述（本 Task で実際に読めた二次資料のみ）:
+#   - MIT Underactuated Robotics, Ch.4 "Simple Models of Walking and Running"
+#     (Russ Tedrake), https://underactuated.mit.edu/simple_legs.html, 取得 2026-06-16。
+#     直接引用: "Perhaps the simplest possible model of a legged robot, introduced as
+#     the conceptual framework for passive-dynamic walking by McGeer[McGeer90], is the
+#     rimless wheel." — McGeer1990 を出典に rimless wheel を最簡受動歩行モデルと位置づけ。
+#   - Garcia, Chatterjee, Ruina, Coleman (1998) "The Simplest Walking Model", J.
+#     Biomech. Eng. 120(2):281-288（検索要約経由、本文 PDF 直接取得は timeout）:
+#     McGeer の 2D rimless wheel は転がる代わりに剛体スポークで pivot/衝突し、
+#     非滑り間欠接触で並進する点を歩行と共有する、と記述。
+RIMLESS_WHEEL_PROVENANCE: str | None = (
+    "rimless（synthetic spoked）wheel を最簡受動歩行モデルとする位置づけは "
+    "MIT Underactuated Robotics Ch.4 (Tedrake, https://underactuated.mit.edu/"
+    "simple_legs.html, 取得 2026-06-16) で確認: 'Perhaps the simplest possible "
+    "model of a legged robot, introduced as the conceptual framework for "
+    "passive-dynamic walking by McGeer[McGeer90], is the rimless wheel.' "
+    "Garcia et al. 1998 'The Simplest Walking Model' も McGeer の 2D rimless wheel を "
+    "前段モデルとして言及。McGeer1990a 一次本文（scanned PDF, テキスト層なし）は "
+    "本 Task では WebFetch timeout で再取得できず、§4 synthetic wheel の記述は本ファイル "
+    "docstring 記載の過去フェーズ読解に依拠する（一次本文の本 Task 内引用は控える）。"
+)
