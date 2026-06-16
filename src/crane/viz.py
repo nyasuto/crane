@@ -9,6 +9,7 @@ matplotlib.use("Agg")
 import matplotlib.animation as animation  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np
+from matplotlib.colors import ListedColormap  # noqa: E402
 
 from crane.stride import StrideResult
 
@@ -387,4 +388,33 @@ def animate_rocker_kneed(
         # ffmpeg が無い環境では GIF にフォールバック
         out = out.with_suffix(".gif")
         anim.save(out, writer=animation.PillowWriter(fps=fps))
+    plt.close(fig)
+
+
+def plot_basin(result, out: Path) -> None:
+    """basin 分類グリッドを描画。CONVERGED=緑, FELL=赤, UNDECIDED=灰。"""
+    cmap = ListedColormap(["#2ca02c", "#d62728", "#999999"])  # 0,1,2
+    fig, ax = plt.subplots(figsize=(6, 5))
+    extent = [
+        result.ax0_vals[0],
+        result.ax0_vals[-1],
+        result.ax1_vals[0],
+        result.ax1_vals[-1],
+    ]
+    ax.imshow(
+        result.grid,
+        origin="lower",
+        extent=extent,
+        aspect="auto",
+        cmap=cmap,
+        vmin=0,
+        vmax=2,
+        interpolation="nearest",
+    )
+    a0, a1 = result.axes
+    ax.plot(result.fixed_point[a0], result.fixed_point[a1], "k*", markersize=12)
+    ax.set_xlabel(f"section[{a0}]")
+    ax.set_ylabel(f"section[{a1}]")
+    ax.set_title(f"{result.model_name}  basin_fraction={result.basin_fraction:.3f}")
+    fig.savefig(out, dpi=150)
     plt.close(fig)
