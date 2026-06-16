@@ -66,7 +66,8 @@ def _measure(R, guess):
     theta_start = float(result.x[0, 0])
     theta_strike = float(result.x_strike[0])
     step_len = abs(_hip_x(theta_strike, R, p.L) - _hip_x(theta_start, R, p.L))
-    cot = mechanical_cot(loss, m=p.m, g=p.g, step_length=step_len) if step_len > 1e-9 else None
+    m_total = 2.0 * p.m + p.m_h  # 総質量（2脚 + hip）。重力入力に対応
+    cot = mechanical_cot(loss, m=m_total, g=p.g, step_length=step_len) if step_len > 1e-9 else None
     return fp, delta, cot, lam_max
 
 
