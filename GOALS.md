@@ -313,4 +313,12 @@ R=0.3 起点に continuation で両方向追跡。主指標は相対損失 δ(R)
   語らない」（井戸の深さ≠広さ）を定量化・機構同定したもの。Heron 教訓（ランダム探索は大域 basin に
   着地せねばならず局所固有値だけでは不十分）の数理的裏付けでもある。
 - 成果物（gitignore 対象）: `data/runs/20260616_225010_wheel_limit/`（R_sweep.png・basin_R_montage.png・R_sweep.json）。
+- **新規性評価（2026-06-16、`docs/2026-06-16-phase4a1-novelty-assessment.md`）**: 一次資料サーベイの結果、
+  本 Phase の概念的中身はほぼ既出。効率↑（Adamczyk/Collins/Kuo 2006）、安定性≠basin（**Schwab & Wisse 2001**
+  ——我々が simplest basin で引用済みの同論文が「basin と線形安定性に直接の関係は無い／最も頑健な設計は
+  basin 最大の方」と明言）、円弧足の fold＋共存鞍点＋basin 崩壊（**MMT 2025/26**）。決定的テストで GSN 2007 /
+  MMT 2025/26 が**足半径を制御軸として既に使用**と判明し、「足半径という新軸」の擁護線も弱い。残りうる狭い
+  貢献は (1) 効率×固有値安定性×basin の3軸統合提示、(2) basin の内部最大が単調傾向と対立しうる点のみ（要
+  paywall 全文確認）。F（basin＝淘汰の頑健性）は文献に無く我々の仮説。**firm な新規性主張は現状の証拠では
+  支持されない**。位置づけは「既知結果の円弧足 compass での再現・統合」。
 
