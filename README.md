@@ -132,6 +132,46 @@ stride 0:  deviation 5.93e-3
 stride 29: deviation 4.87e-9   ← リミットサイクル収束
 ```
 
+## Phase 4a の結果 (Basin of attraction 可視化)
+
+各 Poincaré 断面点から stride 写像を最大 20 反復し「収束 / 転倒 / 未決」を分類して
+basin（吸引域）を可視化する。統制ペア（点足 vs 円弧足）で **「円弧足が basin を
+広げるか」** を `basin_fraction`（窓内の収束セル率＝面積の代理スカラー）で比較した。
+
+**較正した窓・解像度**: 4つの 3D 断面モデルは公平比較のため**同一窓 half_widths=(0.16, 0.65)**
+（θ_st 軸 ±0.16、θ̇_st 軸 ±0.65、各不動点中心）を共有。res=41 較正で各モデルの収束領域は
+概ね窓内に収まり、残る漏れは +θ_st / -θ̇_st 方向の細い舌状部の先端 0〜3 セルのみ
+（完全包含は可視構造を潰すため不採用）。simplest は文献ゲートが固定する 2D 窓 (0.08, 0.08)。
+本番は **解像度 R=60、14 並列、所要 ≈35 分**（R=80 は ≈17 分/モデルで 10 分/モデル基準超のため R=60 採用）。
+
+| モデル | 足形状 | basin_fraction (R=60) |
+|--------|--------|----------------------|
+| simplest | 点足 | 0.029 |
+| compass | 点足 | 0.061 |
+| rocker_compass | 円弧足 | **0.117** |
+| kneed | 点足 | **0.108** |
+| rocker_kneed | 円弧足 | 0.061 |
+
+3D 窓はペア内で同一面積（(2·0.16)·(2·0.65)=0.416）なので fraction が面積比較そのもの。
+
+**円弧足 vs 点足の判定（正直に）**:
+- **Compass ペア**: rocker_compass 0.117 > compass 0.061（相対 +92%）→ **円弧足が basin を約 1.9 倍に拡大**。
+  仮説を支持、robust（差は 15% 基準を大きく超える）。
+- **Kneed ペア**: rocker_kneed 0.061 < kneed 0.108（相対 −43%）→ **円弧足が basin を約 0.57 倍に縮小**。
+  仮説に**反する** robust な結果。較正時に点足 kneed の方が窓端漏れが大きく（真の basin はさらに大）、
+  この反転は clipping のアーティファクトではなく実在。**failure ではなく要調査の finding** として記録する
+  （膝つき機構と円弧足の相互作用が compass 系と異なる可能性）。
+
+**simplest のフラクタル的 basin**: basin は窓を斜めに横切る非常に薄い連結スリバーで、
+fraction 0.029。Schwab & Wisse (2001) の "very small and thin, fractal-like" 記述と定性一致
+（薄すぎて物理エンジン上のランダム探索ではリミットサイクルに到達できない、という Heron 教訓の根拠）。
+
+これは Phase 4a の成果物（basin 可視化）。次は **Phase 4b（物理エンジンへの seed 受け渡し）** で
+解析的に求めた不動点を初期値として MuJoCo 等に渡す逆順戦略を検証する。
+
+montage PNG は `data/runs/` 配下（**gitignore 対象＝ローカル成果物**）:
+`data/runs/20260616_144724_basin_compare/basin_compare.png`（+ `basin_fractions.json`）。
+
 ## セットアップ
 
 ```bash
@@ -161,7 +201,10 @@ uv run python scripts/walk_rocker.py [--gamma-deg <published>] [--strides 30] [-
 # Phase 3.6 デモ歩行: 円弧足 Rocker-foot Kneed Walker（4セグメント walk.mp4 + phase_portrait.png + meta.json）
 uv run python scripts/walk_rocker_kneed.py [--gamma-deg <published>] [--strides 30] [--perturb 0.005]
 
-# テスト（89 tests）
+# Phase 4a basin 比較: 5モデルの吸引域 montage + basin_fraction 表（data/runs/ に出力）
+uv run python scripts/basin_compare.py [--resolution 60] [--workers N]
+
+# テスト（98 tests）
 uv run pytest
 ```
 

@@ -107,7 +107,7 @@
 
 - rocker foot 化（McGeer 1990 原機械、Phase 4 候補）
 - search のバックトラッキングに Armijo 条件（issue #1 と同根）
-- 物理エンジン (MuJoCo) 再現と basin 可視化（Phase 4、設計上スコープ外・記録のみ）
+- basin 可視化 → Phase 4a で実施（完了）。物理エンジン (MuJoCo) seed 受け渡し → Phase 4b（未着手）
 
 ## Phase 3.5: Rocker-foot Compass (McGeer 1990a) — 完了 (2026-06-16)
 
@@ -147,7 +147,7 @@
 
 - kneed + rocker = McGeer 1990b 原機械の完全再現（Phase 3 + Phase 3.5 の合流、次候補）
 - search のバックトラッキングに Armijo 条件（issue #1 と同根）
-- 物理エンジン (MuJoCo) 再現と basin 可視化（設計上スコープ外・記録のみ）
+- basin 可視化 → Phase 4a で実施（完了）。物理エンジン (MuJoCo) seed 受け渡し → Phase 4b（未着手）
 
 ## Phase 3.6: Rocker-foot Kneed Walker (McGeer 1990b 原機械) — 完了 (2026-06-16)
 
@@ -196,4 +196,72 @@ kneed.py / rocker_compass.py は一切改変せず。
 - 分布質量脚（回転半径 ρ ≠ 0）で McGeer 1990b の印刷固有値（0.447）を厳密一致させる
   （Phase 3.5 の 2 点質量手法を kneed の各脚セグメントに適用すれば可能）
 - search のバックトラッキングに Armijo 条件（issue #1 と同根）
-- 物理エンジン (MuJoCo) 再現と basin 可視化（設計上スコープ外・記録のみ）
+- basin 可視化は Phase 4a で実施（下記）。物理エンジン (MuJoCo) への seed 受け渡しは Phase 4b（未着手）
+
+## Phase 4a: Basin of attraction 可視化 — 完了 (2026-06-16)
+
+各 Poincaré 断面点から stride 写像を最大 20 反復し「収束 / 転倒 / 未決」を分類して
+basin（吸引域）を地図化（`basin.py`）。統制ペア（点足 vs 円弧足）で **円弧足が basin を
+広げるか** を `basin_fraction`（窓内収束セル率＝面積の代理）で検証。窓はペア内で同一に
+適用し、仮説が偽でも正直に報告する。
+
+**較正した窓**: 4つの 3D 断面モデル（compass / rocker_compass / kneed / rocker_kneed）は
+公平比較のため**同一窓 half_widths=(0.16, 0.65)**（θ_st 軸 ±0.16、θ̇_st 軸 ±0.65、不動点中心）を
+共有。res=41 較正で収束領域は概ね窓内に収まり、残る漏れは +θ_st / -θ̇_st 方向の細い舌状部の
+先端 0〜3 セルのみ（完全包含は可視構造を潰すため不採用。漏れは basin が大きい側ほど大きく、
+両判定を弱めず強める向き）。simplest は文献ゲートが固定する 2D 窓 (0.08, 0.08)。
+本番は **解像度 R=60、14 並列、≈35 分**（R=80 は ≈17 分/モデルで基準超のため R=60）。
+
+**実測 basin_fraction (R=60)**:
+
+| モデル | 足形状 | basin_fraction |
+|--------|--------|----------------|
+| simplest | 点足 | 0.029 |
+| compass | 点足 | 0.061 |
+| rocker_compass | 円弧足 | 0.117 |
+| kneed | 点足 | 0.108 |
+| rocker_kneed | 円弧足 | 0.061 |
+
+**円弧足 vs 点足の判定（正直に）**:
+- **Compass ペア**: rocker 0.117 > point 0.061（相対 +92%）→ 円弧足が basin を約 1.9 倍に拡大。robust、仮説支持。
+- **Kneed ペア**: rocker 0.061 < point 0.108（相対 −43%）→ 円弧足が basin を約 0.57 倍に縮小。robust に**仮説と反する**。
+  較正時に点足 kneed の方が窓端漏れが大きく、clipping アーティファクトではない。failure ではなく
+  **要調査の finding**（膝つき機構と円弧足の相互作用が compass 系と異なる可能性）。
+
+### ゲート
+- [x] basin.py 分類 + 並列スライス + plot_basin（テスト pass）
+- [x] 内部整合ゲート（不動点近傍球が全 CONVERGED ＝ max|λ|<1 と整合）
+- [x] simplest 文献ゲート（Schwab & Wisse 2001 provenance、定性一致：薄くフラクタル的）
+- [x] 5モデル統制比較（calibrated 窓 (0.16,0.65)・解像度 R=60）：実測 basin_fraction を記録
+      （simplest 0.029 / compass 0.061 / rocker_compass 0.117 / kneed 0.108 / rocker_kneed 0.061;
+      compass ペアは rocker>point で仮説支持、kneed ペアは rocker<point で仮説に反する＝要調査 finding）
+- [x] **ぽんぽこ殿の目視判定**: basin_compare.png が実測と整合（rocker_compass は compass より明らかに広い、
+      rocker_kneed は kneed より狭い、simplest は最も狭く薄い）と確認（2026-06-16 合格判定）
+
+### Phase 4a で得た知見
+
+- 「円弧足が basin を広げる」は普遍則ではない。compass ペアでは成立（×1.9）するが、
+  kneed ペアでは反転（×0.57）。膝つきハイブリッド（4相）と円弧足転がり接触の相互作用が
+  compass 系（2相）と質的に異なる可能性。Phase 4b 以降の調査対象
+- **文献照合（一次資料、2026-06-16 取得）**: この結果は文献と整合する。McGeer 1990b
+  ("Passive Walking with Knees", ICRA) は膝を必須ではなくクリアランス装置と位置づけ
+  （遊脚の "toe stubbing" を受動的に解決；直脚機は 3 J/step のリトラクションモータが必要だった）、
+  安定性向上は "in some cases more stable" と控えめ。basin の拡大は**膝ではなく円弧足**に帰属
+  （Hsu Chen 2007 MIT thesis §3.3.2:「curved feet ... increase their basins of attraction」）。
+  さらに Hsu Chen は「足擦り＝転倒を課すと kneed の basin は縮む」と示す。kneed vs 直脚の
+  basin **サイズ**を定量比較した査読論文は見当たらず、本結果は文献ギャップに位置する
+- **重要 caveat（issue #6 連動）**: Hsu Chen の「kneed basin 縮小」は「曲がったまま接地＝転倒」を
+  課した場合の話。本実装の basin 計算がこの bent-knee 接地を `StrideError` で転倒検出できているか
+  未確認（= 未実装の issue #6）。未検出なら kneed の basin_fraction は過大評価で、真の物理 basin は
+  さらに小さい可能性。issue #6 実装後に kneed basin を測り直すのが次の一手
+- simplest の basin は窓を斜めに横切る非常に薄いフラクタル的スリバー（fraction 0.029）。
+  Schwab & Wisse 2001 の "very small and thin, fractal-like" と定性一致。物理エンジン上の
+  ランダム探索が届かない（Heron 教訓）理由を可視化で裏付け
+- basin_compare.png / basin_fractions.json は `data/runs/` 配下＝**gitignore 対象のローカル成果物**:
+  `data/runs/20260616_144724_basin_compare/basin_compare.png`
+
+### 今後の課題（Phase 4b 以降）
+
+- **Phase 4b（未着手）**: 解析的に求めた不動点を初期値として物理エンジン (MuJoCo 等) に
+  受け渡す逆順戦略の検証（Heron が失敗したランダム探索を解析 seed で置き換える）
+- kneed ペアで円弧足が basin を縮小する機構の解明（4相 hybrid × 円弧足の相互作用）
