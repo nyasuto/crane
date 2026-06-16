@@ -361,7 +361,7 @@ continuation して平地サイクルを発見。
 - [x] **push-off→0 退化ゲート**: push_off=0 で Phase 3.5 検証済み (0.30844, −1.26256, −0.87914) に全 stride 一致
 - [x] 動力サイクル γ=0.030・push_off∈[0,0.08] で安定（max|λ| 0.432→0.462、実測値記録）
 - [x] push-off がエネルギー注入（post-collision KE 増加＝テストでゲート化。walkable slope の平地側拡張は de-risk 継続で確認）
-- [ ] **ぽんぽこ殿の目視判定**: walk.mp4 が「円弧足で転がりつつ push-off で歩く」に見える
+- [x] **ぽんぽこ殿の目視判定**: walk.mp4 が「円弧足で転がりつつ push-off で歩く」に見える（2026-06-17 合格判定）
 
 ### Phase 5b で得た知見
 - rocker は push-off でも完全な平地 γ=0 には届かず fold でサイクルが消失（R=0.3）。Phase 4a.1 の
