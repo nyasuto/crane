@@ -74,3 +74,38 @@ STABLE_GAMMA_MAX: float | None = 0.0151
 
 # スケーリング則 θ* ∝ γ^(1/3)（論文 eq.6、abstract でも明言）
 SCALING_EXPONENT: float = 1.0 / 3.0
+
+
+# --- Basin of attraction (Schwab & Wisse 2001) ---
+# Schwab, A.L. & Wisse, M. (2001) "Basin of Attraction of the Simplest
+# Walking Model", Proc. ASME 2001 International Design Engineering Technical
+# Conferences (IDETC/CIE), Vol. 6A: 18th Biennial Conf. on Mechanical
+# Vibration and Noise, Pittsburgh PA, Sep 9-12 2001, pp. 531-539.
+# DETC2001/VIB-21363, DOI: 10.1115/DETC2001/VIB-21363
+# 抄録ページ URL: https://doi.org/10.1115/DETC2001/VIB-21363  取得日: 2026-06-16
+#
+# 原典本文へのアクセス状況（正直な記録）:
+#   一次資料（Schwab & Wisse 2001）の本文 PDF には到達できなかった
+#   （ResearchGate=HTTP 403, ASME Digital Collection=ペイウォール,
+#    bicycle.tudelft.nl=TLS 証明書エラー、いずれも 2026-06-16 試行）。
+#   到達できたのは ASME の抄録メタデータと、本論文を直接引用・要約している
+#   二次資料: Asano/Zhao ら "Formation mechanism of a basin of attraction
+#   for passive dynamic walking induced by intrinsic hyperbolicity"
+#   (Proc. R. Soc. A 2016, DOI:10.1098/rspa.2016.0028 / PMC4950196)。
+#   そこでの Schwab & Wisse 2001 の要約: basin は "very small and thin" で
+#   "fractal-like shape" を持ち、これが受動歩行の安定化が難しい理由を説明する。
+#   さらに同二次資料は basin が V 字状で cusp 部に fractal 的なスリット/ストライプ
+#   構造を持つ連結領域だと述べる。Garcia et al. 1998（本ファイル冒頭の PROVENANCE）
+#   も薄い basin 図を示しており定性的に整合。
+#
+# 記録する量（原典から取得できたもののみ。取得できなければ None で定性ゲート）:
+BASIN_PROVENANCE: str = (
+    "Schwab & Wisse 2001 DETC2001/VIB-21363 (抄録メタデータ); 本文要約は二次資料 "
+    "Asano/Zhao Proc.R.Soc.A 2016 (PMC4950196) 経由で確認 (取得日 2026-06-16)"
+)
+# basin の定性的特徴（二次資料経由で確認した原典の記述）:
+#   非常に小さく薄い連結領域 + フラクタル的な境界（V 字 cusp、スリット構造）。
+# basin_fraction と直接比較できる公表数値は原典・二次資料とも提示していない
+# （basin は窓依存の図示のみ）。よって None とし定性ゲートに委譲する。
+BASIN_AREA_REF: float | None = None
+BASIN_AREA_REF_TOL: float = 0.30
