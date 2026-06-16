@@ -1,3 +1,4 @@
+# src/crane/basin.py
 """Basin of attraction の分類とスライス計算。
 
 各 Poincaré 断面点から stride 写像を前進反復し「収束 / 転倒 / 未決」を分類する。
@@ -28,6 +29,10 @@ def classify_ic(
 
     deviation<converge_tol で CONVERGED / StrideError で FELL /
     上限まで未収束で UNDECIDED。
+
+    収束判定は一発ヒューリスティック: 軌道が一時的に converge_tol 以内を
+    通過しただけでも CONVERGED と判定する。局所安定な固定点に対する標準的
+    かつ安全な basin ヒューリスティックである。
     """
     fp = np.asarray(fixed_point, dtype=float)
     x = model.lift(np.asarray(y0, dtype=float))
