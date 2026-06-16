@@ -204,7 +204,7 @@ uv run python scripts/walk_rocker_kneed.py [--gamma-deg <published>] [--strides 
 # Phase 4a basin 比較: 5モデルの吸引域 montage + basin_fraction 表（data/runs/ に出力）
 uv run python scripts/basin_compare.py [--resolution 60] [--workers N]
 
-# テスト（89 tests）
+# テスト（98 tests）
 uv run pytest
 ```
 
