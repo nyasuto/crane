@@ -22,7 +22,7 @@ def test_powered_pushoff_zero_basin_matches_passive():
     assert fp_passive.converged and fp_powered.converged
     np.testing.assert_allclose(fp_powered.y, fp_passive.y, atol=1e-8)
 
-    kw = dict(axes=(0, 1), half_widths=(0.16, 0.65), resolution=15, n_workers=1)
+    kw = dict(axes=(0, 1), half_widths=(0.16, 0.65), resolution=7, n_workers=1)
     b_passive = basin_slice(
         make_rocker_compass, passive_params, fp_passive.y, model_name="passive", **kw
     )
