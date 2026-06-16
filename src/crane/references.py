@@ -89,9 +89,9 @@ SCALING_EXPONENT: float = 1.0 / 3.0
 #   （ResearchGate=HTTP 403, ASME Digital Collection=ペイウォール,
 #    bicycle.tudelft.nl=TLS 証明書エラー、いずれも 2026-06-16 試行）。
 #   到達できたのは ASME の抄録メタデータと、本論文を直接引用・要約している
-#   二次資料: Asano/Zhao ら "Formation mechanism of a basin of attraction
-#   for passive dynamic walking induced by intrinsic hyperbolicity"
-#   (Proc. R. Soc. A 2016, DOI:10.1098/rspa.2016.0028 / PMC4950196)。
+#   二次資料: Obayashi, Aoi, Tsuchiya & Kokubu "Formation mechanism of a
+#   basin of attraction for passive dynamic walking induced by intrinsic
+#   hyperbolicity" (Proc. R. Soc. A 2016, DOI:10.1098/rspa.2016.0028 / PMC4950196)。
 #   そこでの Schwab & Wisse 2001 の要約: basin は "very small and thin" で
 #   "fractal-like shape" を持ち、これが受動歩行の安定化が難しい理由を説明する。
 #   さらに同二次資料は basin が V 字状で cusp 部に fractal 的なスリット/ストライプ
@@ -101,7 +101,7 @@ SCALING_EXPONENT: float = 1.0 / 3.0
 # 記録する量（原典から取得できたもののみ。取得できなければ None で定性ゲート）:
 BASIN_PROVENANCE: str = (
     "Schwab & Wisse 2001 DETC2001/VIB-21363 (抄録メタデータ); 本文要約は二次資料 "
-    "Asano/Zhao Proc.R.Soc.A 2016 (PMC4950196) 経由で確認 (取得日 2026-06-16)"
+    "Obayashi/Aoi/Tsuchiya/Kokubu Proc.R.Soc.A 2016 (PMC4950196) 経由で確認 (取得日 2026-06-16)"
 )
 # basin の定性的特徴（二次資料経由で確認した原典の記述）:
 #   非常に小さく薄い連結領域 + フラクタル的な境界（V 字 cusp、スリット構造）。
