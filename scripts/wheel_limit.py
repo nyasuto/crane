@@ -43,7 +43,10 @@ def _params(R):
 
 
 def _hip_x(theta_st, R, L):
-    """stance 接触フレームでの hip 水平位置: -R*theta - (L-R)*sin(theta)。"""
+    """stance 接触フレーム（斜面方向）での hip 前進位置: -R*theta - (L-R)*sin(theta)。
+
+    斜面座標なので鉛直落下 = Δ(この量)·sin γ。COT≈sin γ が閉じるのはこのため。
+    """
     return -R * theta_st - (L - R) * np.sin(theta_st)
 
 

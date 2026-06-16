@@ -32,8 +32,9 @@ def step_collision_loss(
 
 
 def mechanical_cot(loss: float, *, m: float, g: float, step_length: float) -> float:
-    """機械的 cost of transport = 衝突損失 / (m·g·一歩水平距離)。
+    """機械的 cost of transport = 衝突損失 / (m·g·一歩進行距離)。
 
+    step_length は斜面（接触フレーム）方向の進行距離（鉛直落下 = step_length·sin γ）。
     リミットサイクル上ではエネルギー収支より ≈ sin γ になるはず（内部チェック）。
     """
     return loss / (m * g * step_length)
