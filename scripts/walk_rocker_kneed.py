@@ -90,7 +90,6 @@ def main() -> None:
         "eigenvalues_abs": lam.tolist(),
         "stable": bool(lam.max() < 1.0),
         "n_strides_completed": len(strides),
-        "R": p.R,
         "knee_flexion_max_deg": float(np.degrees(max(flexion_maxes))) if flexion_maxes else None,
         "perturb": args.perturb,
     }
