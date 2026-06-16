@@ -349,3 +349,26 @@ continuation して平地サイクルを発見。
 - 成果物（gitignore 対象）: `data/runs/<timestamp>_powered_P0.115/`（walk.mp4・phase_portrait.png・meta.json）。
 - 続き **Phase 5b（能動 rocker_compass で「受動で良い個体は能動でも強いか」検証）** を今後の課題に。
 
+## Phase 5b: 動力付き rocker_compass（push-off 増強）— 完了 (2026-06-17)
+
+円弧足 rocker_compass（Phase 3.5）に pre-emptive push-off（後脚軸方向の撃力）を足し、
+固定勾配 γ=0.030 で push-off がエネルギーを注入する様子を観察した。連続相は rocker_compass と
+同一で、heel-strike を「push-off 撃力 → 角運動量保存衝突 → 脚交換」の合成写像に差し替える
+（push_off=0 で受動に厳密退化）。
+
+### ゲート
+- [x] powered_rocker_compass.py（push-off モーメントを eq1 に追加、push_off=0 で受動退化）
+- [x] **push-off→0 退化ゲート**: push_off=0 で Phase 3.5 検証済み (0.30844, −1.26256, −0.87914) に全 stride 一致
+- [x] 動力サイクル γ=0.030・push_off∈[0,0.08] で安定（max|λ| 0.432→0.462、実測値記録）
+- [x] push-off がエネルギー注入（post-collision KE 増加、walkable slope 拡張）
+- [ ] **ぽんぽこ殿の目視判定**: walk.mp4 が「円弧足で転がりつつ push-off で歩く」に見える
+
+### Phase 5b で得た知見
+- rocker は push-off でも完全な平地 γ=0 には届かず fold でサイクルが消失（R=0.3）。Phase 4a.1 の
+  車輪極限 fold と響き合う（平地歩行のデモではなく記録された知見）。
+- push-off 公式は後脚軸撃力が hip を通るため eq1 のみにモーメントを追加（実装前 de-risk で検証）。
+- 動力サイクル γ=0.030, push_off=0.08 は y*=(0.29247,−1.20217,−0.85407), max|λ|=0.462 で安定。
+  不動点近傍からの 20 歩シミュで deviation が単調減衰（3.6e-3→1.3e-9）して収束。
+- 成果物（gitignore 対象）: `data/runs/<timestamp>_powered_rocker_P0.08/`（walk.mp4・phase_portrait.png・meta.json）。
+- 続き **Phase 5c（R 掃引で能動 vs 受動 basin 比較＝本命仮説）** を今後の課題に。
+
