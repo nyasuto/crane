@@ -322,3 +322,30 @@ R=0.3 起点に continuation で両方向追跡。主指標は相対損失 δ(R)
   paywall 全文確認）。F（basin＝淘汰の頑健性）は文献に無く我々の仮説。**firm な新規性主張は現状の証拠では
   支持されない**。位置づけは「既知結果の円弧足 compass での再現・統合」。
 
+## Phase 5a: 動力付き simplest walker（Kuo 2002）— 完了 (2026-06-17)
+
+simplest walker（Garcia 1998）に pre-emptive push-off（後脚軸方向の撃力 P）を足し、
+**受動では不可能だった平地 γ=0 歩行**を実現した（能動歩行アークの第一段）。連続相は
+simplest と同一（γ 経由）で、heel-strike だけを「push-off 撃力 P → 角運動量保存衝突 →
+脚交換」の合成写像に差し替える（P=0 で受動に厳密退化）。平地 γ=0 では θ 部分系が push-off と
+分離し素朴な shoot が静止解に落ちるため、受動 γ=0.009 から γ→0・push_off→target へ
+continuation して平地サイクルを発見。
+
+### ゲート
+- [x] powered_simplest.py（push-off 合成衝突写像、P=0 で受動退化）
+- [x] **push-off→0 退化ゲート**: P=0 で Phase 1 検証済み受動サイクル (0.2003109, −0.1998325) に全 stride 一致
+- [x] 平地 γ=0 リミットサイクル発見 + 安定性 max|λ|<1（continuation で探索; 実測 y*=(0.3266,−0.3395), P=0.115, max|λ|=0.650）
+- [x] エネルギー収支: push-off 仕事 P²/2 = 一歩衝突損失（~1e-13）
+- [x] Kuo 2002 provenance 記録（abstract 逐語確認 "toe-off は 1/4 コスト" + power law、本文 paywall を明記）
+- [ ] **ぽんぽこ殿の目視判定**: 平地 walk.mp4 が「push-off で前進する歩行」に見える
+
+### Phase 5a で得た知見
+- **受動には不可能だった平地歩行を pre-emptive push-off で実現**（能動歩行アークの第一段）。
+  受動歩行は勾配の重力でしか駆動できないが、heel-strike 前の push-off 撃力で COM を redirection し、
+  平地 γ=0 でも安定リミットサイクル（max|λ|=0.650）を成立させた。
+- 平地 γ=0 では θ 部分系が push-off と分離するため、素朴な shoot は静止解に落ちる。受動サイクルから
+  γ→0・push_off→target へ **continuation 必須**。25 歩シミュで deviation が単調減衰（4.0e-3→5.9e-7）して
+  平地サイクルへ収束することを確認。
+- 成果物（gitignore 対象）: `data/runs/<timestamp>_powered_P0.115/`（walk.mp4・phase_portrait.png・meta.json）。
+- 続き **Phase 5b（能動 rocker_compass で「受動で良い個体は能動でも強いか」検証）** を今後の課題に。
+
