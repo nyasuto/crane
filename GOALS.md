@@ -344,8 +344,8 @@ continuation して平地サイクルを発見。
   受動歩行は勾配の重力でしか駆動できないが、heel-strike 前の push-off 撃力で COM を redirection し、
   平地 γ=0 でも安定リミットサイクル（max|λ|=0.650）を成立させた。
 - 平地 γ=0 では θ 部分系が push-off と分離するため、素朴な shoot は静止解に落ちる。受動サイクルから
-  γ→0・push_off→target へ **continuation 必須**。25 歩シミュで deviation が単調減衰（4.0e-3→5.9e-7）して
-  平地サイクルへ収束することを確認。
+  γ→0・push_off→target へ **continuation 必須**。25 歩シミュで deviation が全体として減衰（4.0e-3→5.9e-7、
+  初期は振動）して平地サイクルへ収束することを確認。
 - 成果物（gitignore 対象）: `data/runs/<timestamp>_powered_P0.115/`（walk.mp4・phase_portrait.png・meta.json）。
 - 続き **Phase 5b（能動 rocker_compass で「受動で良い個体は能動でも強いか」検証）** を今後の課題に。
 
