@@ -19,8 +19,13 @@ from crane.viz import plot_basin
 def _registry():
     """name -> (make_fn, params, guess, axes, half_widths) を返す。
 
-    half_widths は実装時に basin を窓に収めるよう較正（収束領域が窓端に
-    接していたら広げる）。下記は初期値。
+    half_widths は basin を窓に収めるよう較正済み（収束領域が窓端に接していたら
+    広げる方針）。4つの 3D 断面モデル（compass / rocker_compass / kneed /
+    rocker_kneed）は同一窓 (0.16, 0.65) を共有し、ペア内の basin 面積を公平に
+    比較する。res=41 較正で各モデルの収束領域は概ね窓内に収まり、残る漏れは
+    +θ_st / -θ̇_st 方向の細い舌状部の先端 0〜3 セルのみ（完全包含は可視構造を
+    潰すため不採用）。simplest は文献ゲート（test_basin_simplest_literature）が
+    固定する 2D 窓 (0.08, 0.08) を維持。
     """
     from crane import references as ref_s
     from crane import references_goswami as ref_c
@@ -53,7 +58,7 @@ def _registry():
             ),
             np.array(ref_c.SECTION_GUESS),
             (0, 1),
-            (0.12, 0.5),
+            (0.16, 0.65),
         ),
         "kneed": (
             make_kneed,
@@ -70,7 +75,7 @@ def _registry():
             ),
             np.array(ref_k.SECTION_GUESS),
             (0, 1),
-            (0.12, 0.5),
+            (0.16, 0.65),
         ),
         "rocker_compass": (
             make_rocker_compass,
@@ -86,7 +91,7 @@ def _registry():
             ),
             np.array(ref_rc.SECTION_GUESS),
             (0, 1),
-            (0.12, 0.5),
+            (0.16, 0.65),
         ),
         "rocker_kneed": (
             make_rocker_kneed,
@@ -104,7 +109,7 @@ def _registry():
             ),
             np.array(ref_rk.SECTION_GUESS),
             (0, 1),
-            (0.12, 0.5),
+            (0.16, 0.65),
         ),
     }
 
