@@ -204,6 +204,26 @@ basin_fraction(R) を測定。R=0.3 起点に continuation で両方向へ追跡
 成果物（gitignore 対象）: `data/runs/20260616_225010_wheel_limit/`
 （`R_sweep.png` 3段曲線・`basin_R_montage.png`・`R_sweep.json`）。
 
+## Phase 5a の結果 (動力付き simplest walker, Kuo 2002)
+
+受動歩行は勾配の重力でしか駆動できず、平地 γ=0 では歩けない。Kuo 2002 の simplest walker に
+pre-emptive **push-off**（後脚軸方向の撃力 P）を足し、**受動では不可能だった平地歩行を実現**した
+（能動歩行アークの第一段）。連続相は simplest と同一（γ 経由）で、heel-strike だけを
+「push-off 撃力 P → 角運動量保存衝突 → 脚交換」の合成写像に差し替える（P=0 で受動に厳密退化）。
+
+平地 γ=0 では θ 部分系が push-off と分離し、素朴な shoot は静止解に落ちる。そこで受動 γ=0.009
+サイクルから γ→0・push_off→target へ **continuation** して平地サイクルを発見した。
+
+- **平地リミットサイクル（γ=0, push_off=0.115）**: y*=(0.32659862, −0.33950461)、max|λ|=0.650（安定）。
+  不動点近傍からの 25 歩シミュで deviation が全体として減衰（4.0e-3 → 5.9e-7、初期は振動）し、平地サイクルへ収束。
+- **push-off→0 退化ゲート**: P=0 で Phase 1 検証済み受動サイクル (0.2003109, −0.1998325) に全 stride 一致。
+- **エネルギー収支**: push-off 仕事 P²/2 = 一歩衝突損失（~1e-13 で一致）。
+- **Kuo 2002 provenance**: abstract を逐語確認（"toe-off impulse is four times less costly" + power law、
+  `src/crane/references_kuo.py`）。本文は paywall のため照合用の単一印刷数値なし＝数値ゲートは
+  エネルギー収支（P²/2）に委譲。
+
+成果物（gitignore 対象）: `data/runs/<timestamp>_powered_P0.115/`（`walk.mp4`・`phase_portrait.png`・`meta.json`）。
+
 ## セットアップ
 
 ```bash
@@ -238,6 +258,9 @@ uv run python scripts/basin_compare.py [--resolution 60] [--workers N]
 
 # Phase 4a.1 車輪への漸近: rocker_compass の R 掃引で δ(R)・安定性・basin 曲線（data/runs/ に出力）
 uv run python scripts/wheel_limit.py [--dr 0.05] [--basin-res 50] [--workers N]
+
+# Phase 5a デモ歩行: 動力付き simplest walker の平地 γ=0 歩行（continuation で平地サイクル発見）
+uv run python scripts/walk_powered.py [--push-off 0.115] [--strides 30] [--perturb 0.01]
 
 # テスト
 uv run pytest
