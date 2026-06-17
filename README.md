@@ -243,6 +243,36 @@ rocker_compass と同一で、heel-strike を「push-off 撃力 → 角運動量
 
 成果物（gitignore 対象）: `data/runs/<timestamp>_powered_rocker_P0.08/`（`walk.mp4`・`phase_portrait.png`・`meta.json`）。
 
+## Phase 5c の結果（能動 vs 受動 basin 比較、本命仮説）
+
+能動歩行アークの締めくくり。受動歩行で得た「basin こそ頑健性」「basin は R≈0.6 で最大」（Phase 4a.1）に対し、
+**同一勾配 γ=0.030 で各 R に push-off を載せ、能動 basin(R) を受動と比較**して、ぽんぽこ殿の仮説
+「受動で良い個体は能動でも強いか／制御は形態差を消すか」を検証した。`basin_slice`（Phase 4a）＋
+`powered_rocker_compass`（Phase 5b）の再利用で、新規物理なし。
+
+**実測 basin_fraction (res=50, γ=0.030)**:
+
+| R | 受動 P=0 | 能動 P=0.04 | 能動 P=0.08 |
+|---|---------|------------|------------|
+| 0.05 | 0.0368 | 0.0360 | 0.0356 |
+| 0.20 | 0.0724 | 0.0716 | 0.0704 |
+| 0.40 | 0.2004 | 0.2000 | 0.1992 |
+| 0.60 | **0.4296** | **0.4196** | **0.4096** |
+| argmax_R | 0.6 | 0.6 | 0.6 |
+| CV（R間） | 0.833 | 0.826 | 0.820 |
+
+**内部ゲート**: P=0 行が Phase 4a.1 の受動 basin(R)（0.037/0.072/0.200/0.430）を厳密に再現（窓・解像度同一）。
+
+**仮説への答え（正直に）**:
+- **受動の順位は能動でも完全に保存**: basin 最大は常に R≈0.6、順序 0.05<0.2<0.4<0.6 が全 push-off で不変。
+  受動で basin の大きい形態は能動下でも最強のまま。
+- **制御は形態差をほとんど平坦化しない**: CV は 0.833→0.820（~1.5% 縮小のみ）。basin(R) 曲線3本がほぼ重なる。
+- 一様 push-off はこの系で basin をむしろ僅かに縮小させる（R=0.6: 0.430→0.410）。
+- 結論: **形態（受動 basin）こそが頑健性の支配的決定因子であり、一様な能動制御では形態の優劣を覆せない**。
+  受動アークで「basin こそ頑健性」、能動アークで「その頑健性は形態で決まり制御で簡単には動かせない」と定量化。
+
+成果物（gitignore 対象）: `data/runs/<timestamp>_active_basin/`（`active_basin_curves.png`・`active_basin_montage.png`・`active_basin.json`）。
+
 ## セットアップ
 
 ```bash
@@ -283,6 +313,9 @@ uv run python scripts/walk_powered.py [--push-off 0.115] [--strides 30] [--pertu
 
 # Phase 5b デモ歩行: 動力付き rocker_compass（γ=0.030 + push-off 増強, walk.mp4 + phase_portrait.png + meta.json）
 uv run python scripts/walk_powered_rocker.py [--push-off 0.08] [--strides 30] [--perturb 0.005]
+
+# Phase 5c 能動 vs 受動 basin: R×push_off 格子の basin(R,P) 曲線+montage（data/runs/ に出力）
+uv run python scripts/active_basin_sweep.py [--basin-res 50] [--workers N]
 
 # テスト
 uv run pytest
