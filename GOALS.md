@@ -393,7 +393,7 @@ argmax_R=0.6（全 P）、CV（R間）0.833→0.826→0.820。
 - [x] push_off→0 内部ゲート: P=0 の能動 basin が受動 rocker_compass の basin に厳密一致（grid・fraction）
 - [x] (R,P) 格子で能動 basin_fraction を測定（上表）。P=0 行が 4a.1 受動値（0.037/0.072/0.200/0.430）を再現
 - [x] 仮説判定: 受動順位は能動で完全保存（argmax_R=0.6 不変）、制御の平坦化はわずか（CV ~1.5% 縮小のみ）
-- [ ] **ぽんぽこ殿の目視判定**: active_basin_curves.png / montage が主張を支持して見える
+- [x] **ぽんぽこ殿の目視判定**: active_basin_curves.png / montage が主張を支持して見える（2026-06-17 合格判定）
 
 ### Phase 5c で得た知見（本命仮説への答え）
 - **受動の順位は能動でも完全に保存**: basin 最大は常に R≈0.6、順序 0.05<0.2<0.4<0.6 が全 push-off で不変。
