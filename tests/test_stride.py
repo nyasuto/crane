@@ -5,7 +5,6 @@ from crane import references as ref
 from crane.models.simplest import SimplestParams, lift, make_simplest
 from crane.stride import StrideError, stride
 
-
 MODEL = make_simplest(SimplestParams(gamma=ref.GAMMA_REF))
 
 

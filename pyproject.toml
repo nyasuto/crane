@@ -4,16 +4,16 @@ version = "0.1.0"
 description = "Passive dynamic walking limit cycle discovery (math-first revival of Heron)"
 requires-python = ">=3.12"
 dependencies = [
-    "numpy>=2.5.0",
-    "scipy>=1.18.0",
-    "matplotlib>=3.9",
+    "numpy>=2.5.2",
+    "scipy>=1.18.1",
+    "matplotlib>=3.11.1",
     "sympy>=1.14.0",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
-    "ruff>=0.15.20",
+    "ruff>=0.16.5",
 ]
 
 [build-system]

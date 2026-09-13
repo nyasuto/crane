@@ -1,11 +1,11 @@
 import numpy as np
 
-from crane.models.simplest import heelstrike_map as passive_heelstrike
 from crane.models.powered_simplest import (
     PoweredSimplestParams,
     make_powered_simplest,
     powered_heelstrike_map,
 )
+from crane.models.simplest import heelstrike_map as passive_heelstrike
 
 
 def test_pushoff_zero_equals_passive_map():

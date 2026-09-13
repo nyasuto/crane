@@ -6,17 +6,17 @@ from crane.models.kneed import KneedParams, make_kneed
 from crane.models.rocker_kneed import RockerKneedParams, make_rocker_kneed
 from crane.search import find_limit_cycle
 
-KW = dict(
-    m_h=kref.M_HIP,
-    m_t=kref.M_THIGH,
-    m_s=kref.M_SHANK,
-    l_t=kref.L_THIGH,
-    l_s=kref.L_SHANK,
-    b_t=kref.B_THIGH,
-    b_s=kref.B_SHANK,
-    gamma=kref.GAMMA_GAIT,
-    g=kref.G,
-)
+KW = {
+    "m_h": kref.M_HIP,
+    "m_t": kref.M_THIGH,
+    "m_s": kref.M_SHANK,
+    "l_t": kref.L_THIGH,
+    "l_s": kref.L_SHANK,
+    "b_t": kref.B_THIGH,
+    "b_s": kref.B_SHANK,
+    "gamma": kref.GAMMA_GAIT,
+    "g": kref.G,
+}
 
 
 def test_full_cycle_reduces_to_pointfoot_kneed():

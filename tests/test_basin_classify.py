@@ -1,9 +1,9 @@
 import numpy as np
 
+from crane import references as ref
 from crane.basin import CONVERGED, FELL, UNDECIDED, classify_ic
 from crane.models.simplest import SimplestParams, make_simplest
 from crane.search import find_limit_cycle
-from crane import references as ref
 
 
 def _simplest_fp():
