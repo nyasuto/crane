@@ -9,13 +9,13 @@ import csv
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
 
-from crane import references_goswami as ref  # noqa: E402
-from crane.models.compass import CompassParams, make_compass  # noqa: E402
-from crane.runs import new_run_dir  # noqa: E402
-from crane.search import find_limit_cycle, poincare_map  # noqa: E402
+from crane import references_goswami as ref
+from crane.models.compass import CompassParams, make_compass
+from crane.runs import new_run_dir
+from crane.search import find_limit_cycle, poincare_map
 
 
 def make_params(gamma: float) -> CompassParams:
@@ -70,7 +70,7 @@ def main() -> None:
             for _ in range(20):
                 try:
                     y_iter = poincare_map(model2, y_iter)
-                except Exception:
+                except Exception:  # noqa: BLE001 - 転倒など積分が破綻したら反復を打ち切る
                     break
             fp_seed = find_limit_cycle(model2, y_iter, n_strides=2)
             if fp_seed.converged and not np.allclose(fp_seed.y, y2, atol=1e-6):

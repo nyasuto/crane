@@ -6,7 +6,16 @@ from crane.models.powered_rocker_compass import (
 )
 from crane.search import find_limit_cycle
 
-NOMINAL = dict(m=1.0, m_h=0.0, c=0.37, rho=0.32, L=1.0, R=0.3, gamma=0.030, g=9.81)
+NOMINAL = {
+    "m": 1.0,
+    "m_h": 0.0,
+    "c": 0.37,
+    "rho": 0.32,
+    "L": 1.0,
+    "R": 0.3,
+    "gamma": 0.030,
+    "g": 9.81,
+}
 GUESS = np.array([0.30844, -1.26256, -0.87914])
 
 

@@ -76,8 +76,10 @@ model 非依存の効率指標。`kinetic_energy` を callable として受け�
 def relative_loss(ke_pre: float, ke_post: float) -> float:
     """δ = (KE_pre - KE_post)/KE_pre。車輪極限で →0。"""
 
+
 def step_collision_loss(x_strike, x_end, kinetic_energy) -> tuple[float, float, float]:
     """(loss, ke_pre, ke_post) を返す。loss = KE(x_strike) - KE(x_end)。"""
+
 
 def mechanical_cot(loss: float, m: float, g: float, step_length: float) -> float:
     """衝突損失 / (m·g·一歩水平距離)。リミットサイクル上では ≈ sin γ になるはず。"""

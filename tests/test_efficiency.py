@@ -1,10 +1,10 @@
 import numpy as np
 
+from crane import references_mcgeer as ref
 from crane.efficiency import mechanical_cot, relative_loss, step_collision_loss
 from crane.models.rocker_compass import RockerCompassParams, kinetic_energy, make_rocker_compass
 from crane.search import find_limit_cycle
 from crane.stride import stride
-from crane import references_mcgeer as ref
 
 
 def test_relative_loss_basic():

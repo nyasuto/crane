@@ -33,7 +33,7 @@ class CompassParams:
     g: float = 9.81
 
     @property
-    def l(self) -> float:  # noqa: E743
+    def l(self) -> float:
         return self.a + self.b
 
 

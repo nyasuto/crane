@@ -307,7 +307,7 @@ PROVENANCE = (
 GAMMA_REF = 0.009
 
 # γ=0.009 の long-period gait 不動点 (heel-strike 直後の断面座標)
-LONG_PERIOD_THETA: float = ...      # stance angle θ* [rad]
+LONG_PERIOD_THETA: float = ...  # stance angle θ* [rad]
 LONG_PERIOD_THETA_DOT: float = ...  # θ̇*
 
 # γ=0.009 の short-period gait 不動点
@@ -432,9 +432,7 @@ def heelstrike_map(x: np.ndarray) -> np.ndarray:
 
 def lift(theta: float, theta_dot: float) -> np.ndarray:
     """Poincaré 断面座標 y=(θ, θ̇) を全状態へ持ち上げる（衝突直後の拘束）。"""
-    return np.array(
-        [theta, 2.0 * theta, theta_dot, (1.0 - np.cos(2.0 * theta)) * theta_dot]
-    )
+    return np.array([theta, 2.0 * theta, theta_dot, (1.0 - np.cos(2.0 * theta)) * theta_dot])
 ```
 
 - [ ] **Step 4: テストを実行して通ることを確認**
@@ -723,7 +721,9 @@ def find_limit_cycle(
         history.append((y.copy(), norm))
         if norm < tol:
             J = _jacobian(p, y)
-            return FixedPoint(y=y, eigenvalues=np.linalg.eigvals(J), converged=True, history=history)
+            return FixedPoint(
+                y=y, eigenvalues=np.linalg.eigvals(J), converged=True, history=history
+            )
         J = _jacobian(p, y)
         y = y - np.linalg.solve(J - np.eye(y.size), residual)
 
