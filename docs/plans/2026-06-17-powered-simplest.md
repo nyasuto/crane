@@ -208,9 +208,7 @@ def test_single_stride_matches_passive_at_pushoff_zero():
 def test_limit_cycle_matches_phase1_at_pushoff_zero():
     gamma = ref.GAMMA_REF
     powered = make_powered_simplest(PoweredSimplestParams(gamma=gamma, push_off=0.0))
-    fp = find_limit_cycle(
-        powered, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT])
-    )
+    fp = find_limit_cycle(powered, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT]))
     assert fp.converged
     # Phase 1 検証済み long-period 不動点・固有値に一致
     np.testing.assert_allclose(fp.y, [0.2003109, -0.1998325], atol=1e-5)
@@ -287,7 +285,9 @@ from crane import references_kuo as ref
 def test_kuo_provenance_present():
     assert isinstance(ref.PROVENANCE, str) and len(ref.PROVENANCE) > 0
     # 数値を主張するなら provenance に URL か取得失敗の明記があること
-    assert ("http" in ref.PROVENANCE) or ("未取得" in ref.PROVENANCE) or ("取得失敗" in ref.PROVENANCE)
+    assert (
+        ("http" in ref.PROVENANCE) or ("未取得" in ref.PROVENANCE) or ("取得失敗" in ref.PROVENANCE)
+    )
 ```
 
 - [ ] **Step 3: Run + ruff + commit**

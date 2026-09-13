@@ -12,14 +12,13 @@ import json
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.colors import ListedColormap  # noqa: E402
+import matplotlib.pyplot as plt
+from basin_map import _registry
+from matplotlib.colors import ListedColormap
 
-from crane.basin import basin_slice  # noqa: E402
-from crane.runs import new_run_dir  # noqa: E402
-from crane.search import find_limit_cycle  # noqa: E402
-
-from basin_map import _registry  # noqa: E402  同 scripts/ 内
+from crane.basin import basin_slice
+from crane.runs import new_run_dir
+from crane.search import find_limit_cycle
 
 
 def main() -> None:

@@ -74,22 +74,34 @@ Phase 4a は原点に立ち戻る二段構えの第一段である。物理エ�
 ```python
 CONVERGED, FELL, UNDECIDED = 0, 1, 2
 
+
 def classify_ic(model, y0, fixed_point, *, max_strides=20, converge_tol=1e-3) -> int:
     """断面点 y0 から stride を最大 max_strides 反復。
     deviation<tol で CONVERGED / StrideError で FELL / 上限まで未収束で UNDECIDED。"""
 
+
 @dataclass(frozen=True)
 class BasinResult:
-    grid: np.ndarray          # (res, res) の分類コード
+    grid: np.ndarray  # (res, res) の分類コード
     ax0_vals: np.ndarray
     ax1_vals: np.ndarray
-    axes: tuple[int, int]     # 掃引した断面座標インデックス
+    axes: tuple[int, int]  # 掃引した断面座標インデックス
     fixed_point: np.ndarray
-    basin_fraction: float     # 掃引窓内の収束セル率（比較スカラー）
+    basin_fraction: float  # 掃引窓内の収束セル率（比較スカラー）
     model_name: str
 
-def basin_slice(model, fixed_point, *, axes=(0, 1), half_widths, resolution,
-                max_strides=20, converge_tol=1e-3, n_workers=None) -> BasinResult:
+
+def basin_slice(
+    model,
+    fixed_point,
+    *,
+    axes=(0, 1),
+    half_widths,
+    resolution,
+    max_strides=20,
+    converge_tol=1e-3,
+    n_workers=None,
+) -> BasinResult:
     """fixed_point 中心、axes 以外の断面座標を不動点値に固定して 2D 掃引。
     multiprocessing.Pool でグリッド点を並列分類。"""
 ```

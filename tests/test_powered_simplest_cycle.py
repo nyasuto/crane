@@ -35,7 +35,7 @@ def _find_level_cycle():
 
 
 def test_level_ground_limit_cycle_exists_and_stable():
-    push_off, model, fp = _find_level_cycle()
+    _push_off, _model, fp = _find_level_cycle()
     assert fp.converged
     assert np.max(np.abs(fp.eigenvalues)) < 1.0
     assert fp.y[1] < 0.0  # 前進方向
