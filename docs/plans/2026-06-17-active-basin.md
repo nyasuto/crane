@@ -166,9 +166,14 @@ def main() -> None:
                 print(f"R={R} P={P}: cycle not found, skip")
                 continue
             res = basin_slice(
-                make_powered_rocker_compass, params, fp.y,
-                axes=(0, 1), half_widths=(0.16, 0.65), resolution=args.basin_res,
-                model_name=f"R{R}_P{P}", n_workers=args.workers,
+                make_powered_rocker_compass,
+                params,
+                fp.y,
+                axes=(0, 1),
+                half_widths=(0.16, 0.65),
+                resolution=args.basin_res,
+                model_name=f"R{R}_P{P}",
+                n_workers=args.workers,
             )
             fracs[(R, P)] = res.basin_fraction
             grids[(R, P)] = res
@@ -207,9 +212,14 @@ def main() -> None:
                     continue
                 g = grids[(R, P)]
                 a.imshow(
-                    g.grid, origin="lower",
+                    g.grid,
+                    origin="lower",
                     extent=[g.ax0_vals[0], g.ax0_vals[-1], g.ax1_vals[0], g.ax1_vals[-1]],
-                    aspect="auto", cmap=cmap, vmin=0, vmax=2, interpolation="nearest",
+                    aspect="auto",
+                    cmap=cmap,
+                    vmin=0,
+                    vmax=2,
+                    interpolation="nearest",
                 )
                 a.set_title(f"R={R} P={P}\nfrac={g.basin_fraction:.3f}", fontsize=8)
         fig2.tight_layout()
@@ -235,8 +245,14 @@ def main() -> None:
         "summary_by_pushoff": {str(P): summary[P] for P in summary},
     }
     (run_dir / "active_basin.json").write_text(json.dumps(data, indent=2, default=str))
-    print("summary:", {P: (summary[P]["argmax_R"], round(summary[P]["cv_across_R"], 3))
-                        for P in summary if summary[P]["cv_across_R"] is not None})
+    print(
+        "summary:",
+        {
+            P: (summary[P]["argmax_R"], round(summary[P]["cv_across_R"], 3))
+            for P in summary
+            if summary[P]["cv_across_R"] is not None
+        },
+    )
     print(f"outputs -> {run_dir}")
 
 

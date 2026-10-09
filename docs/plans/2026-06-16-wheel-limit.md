@@ -70,8 +70,14 @@ def test_mechanical_cot_basic():
 def test_step_collision_loss_on_rocker_limit_cycle():
     # 実モデルの 1 歩で 0 < δ < 1、KE_pre > KE_post（衝突は散逸）。
     p = RockerCompassParams(
-        m=ref.M_LEG, m_h=ref.M_HIP, c=ref.C_HIP_TO_COM, rho=ref.RHO_GYR,
-        L=ref.L_LEG, R=ref.R_FOOT, gamma=ref.GAMMA_GAIT, g=ref.G,
+        m=ref.M_LEG,
+        m_h=ref.M_HIP,
+        c=ref.C_HIP_TO_COM,
+        rho=ref.RHO_GYR,
+        L=ref.L_LEG,
+        R=ref.R_FOOT,
+        gamma=ref.GAMMA_GAIT,
+        g=ref.G,
     )
     model = make_rocker_compass(p)
     fp = find_limit_cycle(model, np.array(ref.SECTION_GUESS))
@@ -177,8 +183,14 @@ from crane import references_mcgeer as ref
 
 def _fp_at_R(R, guess):
     p = RockerCompassParams(
-        m=ref.M_LEG, m_h=ref.M_HIP, c=ref.C_HIP_TO_COM, rho=ref.RHO_GYR,
-        L=ref.L_LEG, R=R, gamma=ref.GAMMA_GAIT, g=ref.G,
+        m=ref.M_LEG,
+        m_h=ref.M_HIP,
+        c=ref.C_HIP_TO_COM,
+        rho=ref.RHO_GYR,
+        L=ref.L_LEG,
+        R=R,
+        gamma=ref.GAMMA_GAIT,
+        g=ref.G,
     )
     return find_limit_cycle(make_rocker_compass(p), np.array(guess))
 
@@ -187,9 +199,7 @@ def test_R030_reproduces_phase35_cycle():
     """最強アンカー: R=0.3 で Phase 3.5 検証済みサイクルを再現。"""
     fp = _fp_at_R(0.3, ref.SECTION_GUESS)
     assert fp.converged
-    np.testing.assert_allclose(
-        fp.y, [0.30844, -1.26256, -0.87914], atol=1e-3
-    )
+    np.testing.assert_allclose(fp.y, [0.30844, -1.26256, -0.87914], atol=1e-3)
     assert np.max(np.abs(fp.eigenvalues)) < 1.0  # 安定
 
 
@@ -265,8 +275,14 @@ from crane.stride import StrideError, stride  # noqa: E402
 
 def _params(R):
     return RockerCompassParams(
-        m=ref.M_LEG, m_h=ref.M_HIP, c=ref.C_HIP_TO_COM, rho=ref.RHO_GYR,
-        L=ref.L_LEG, R=R, gamma=ref.GAMMA_GAIT, g=ref.G,
+        m=ref.M_LEG,
+        m_h=ref.M_HIP,
+        c=ref.C_HIP_TO_COM,
+        rho=ref.RHO_GYR,
+        L=ref.L_LEG,
+        R=R,
+        gamma=ref.GAMMA_GAIT,
+        g=ref.G,
     )
 
 
@@ -346,9 +362,14 @@ def main() -> None:
     for r in basin_Rs:
         fp = records[r][0]
         res = basin_slice(
-            make_rocker_compass, _params(r), fp.y,
-            axes=(0, 1), half_widths=(0.16, 0.65), resolution=args.basin_res,
-            model_name=f"rocker_compass_R{r}", n_workers=args.workers,
+            make_rocker_compass,
+            _params(r),
+            fp.y,
+            axes=(0, 1),
+            half_widths=(0.16, 0.65),
+            resolution=args.basin_res,
+            model_name=f"rocker_compass_R{r}",
+            n_workers=args.workers,
         )
         basin_fracs[r] = res.basin_fraction
         basin_grids[r] = res
@@ -381,9 +402,14 @@ def main() -> None:
         for ax, r in zip(axs2, order):
             g = basin_grids[r]
             ax.imshow(
-                g.grid, origin="lower",
+                g.grid,
+                origin="lower",
                 extent=[g.ax0_vals[0], g.ax0_vals[-1], g.ax1_vals[0], g.ax1_vals[-1]],
-                aspect="auto", cmap=cmap, vmin=0, vmax=2, interpolation="nearest",
+                aspect="auto",
+                cmap=cmap,
+                vmin=0,
+                vmax=2,
+                interpolation="nearest",
             )
             ax.plot(g.fixed_point[0], g.fixed_point[1], "k*", markersize=10)
             ax.set_title(f"R={r}\nfrac={g.basin_fraction:.3f}")
@@ -400,9 +426,7 @@ def main() -> None:
         "max_lambda": lam_curve,
         "fixed_points": [records[r][0].y.tolist() for r in Rs],
         "basin_fraction": basin_fracs,
-        "walking_vanishes_at": (
-            min((r for r, v in records.items() if v is None), default=None)
-        ),
+        "walking_vanishes_at": (min((r for r, v in records.items() if v is None), default=None)),
     }
     (run_dir / "R_sweep.json").write_text(json.dumps(data, indent=2, default=str))
     print(f"outputs -> {run_dir}")

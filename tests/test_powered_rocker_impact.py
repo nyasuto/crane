@@ -1,17 +1,28 @@
 import numpy as np
 
-from crane.models.rocker_compass import (
-    RockerCompassParams,
-    heelstrike_map as passive_heelstrike,
-    kinetic_energy,
-)
 from crane.models.powered_rocker_compass import (
     PoweredRockerCompassParams,
     make_powered_rocker_compass,
     powered_heelstrike_map,
 )
+from crane.models.rocker_compass import (
+    RockerCompassParams,
+    kinetic_energy,
+)
+from crane.models.rocker_compass import (
+    heelstrike_map as passive_heelstrike,
+)
 
-NOMINAL = dict(m=1.0, m_h=0.0, c=0.37, rho=0.32, L=1.0, R=0.3, gamma=0.030, g=9.81)
+NOMINAL = {
+    "m": 1.0,
+    "m_h": 0.0,
+    "c": 0.37,
+    "rho": 0.32,
+    "L": 1.0,
+    "R": 0.3,
+    "gamma": 0.030,
+    "g": 9.81,
+}
 
 
 def test_pushoff_zero_equals_passive():

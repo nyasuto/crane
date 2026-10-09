@@ -139,9 +139,7 @@ class PoweredRockerCompassParams:
 @lru_cache(maxsize=1)
 def _build():
     th_st, th_sw, w_st, w_sw = sp.symbols("th_st th_sw w_st w_sw")
-    m, m_h, c, rho, L, R, gamma, g, po = sp.symbols(
-        "m m_h c rho L R gamma g po", positive=True
-    )
+    m, m_h, c, rho, L, R, gamma, g, po = sp.symbols("m m_h c rho L R gamma g po", positive=True)
     q, qd = [th_st, th_sw], [w_st, w_sw]
 
     def down(theta):
@@ -283,9 +281,7 @@ def test_single_stride_matches_passive_at_pushoff_zero():
     passive = make_rocker_compass(RockerCompassParams(**NOMINAL))
     powered = make_powered_rocker_compass(PoweredRockerCompassParams(**NOMINAL, push_off=0.0))
     x0 = passive.lift(np.array([0.30844, -1.26256, -0.87914]))
-    np.testing.assert_allclose(
-        stride(powered, x0).x_end, stride(passive, x0).x_end, atol=1e-10
-    )
+    np.testing.assert_allclose(stride(powered, x0).x_end, stride(passive, x0).x_end, atol=1e-10)
 
 
 def test_limit_cycle_matches_phase35_at_pushoff_zero():
@@ -418,8 +414,15 @@ def main() -> None:
     args = parser.parse_args()
 
     p = PoweredRockerCompassParams(
-        m=1.0, m_h=0.0, c=0.37, rho=0.32, L=1.0, R=0.3, gamma=0.030,
-        push_off=args.push_off, g=9.81,
+        m=1.0,
+        m_h=0.0,
+        c=0.37,
+        rho=0.32,
+        L=1.0,
+        R=0.3,
+        gamma=0.030,
+        push_off=args.push_off,
+        g=9.81,
     )
     model = make_powered_rocker_compass(p)
     fp = find_limit_cycle(model, np.array([0.30844, -1.26256, -0.87914]))
@@ -447,9 +450,13 @@ def main() -> None:
     animate_rocker(strides, p.L, p.R, p.gamma, run_dir / "walk.mp4")
 
     meta = {
-        "gamma": 0.030, "push_off": args.push_off, "R": p.R,
-        "fixed_point": fp.y.tolist(), "eigenvalues_abs": lam.tolist(),
-        "stable": bool(lam.max() < 1.0), "n_strides_completed": len(strides),
+        "gamma": 0.030,
+        "push_off": args.push_off,
+        "R": p.R,
+        "fixed_point": fp.y.tolist(),
+        "eigenvalues_abs": lam.tolist(),
+        "stable": bool(lam.max() < 1.0),
+        "n_strides_completed": len(strides),
     }
     (run_dir / "meta.json").write_text(json.dumps(meta, indent=2))
     print(f"outputs -> {run_dir}")

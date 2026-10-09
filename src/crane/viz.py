@@ -6,10 +6,10 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.animation as animation  # noqa: E402
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.colors import ListedColormap  # noqa: E402
+from matplotlib import animation
+from matplotlib.colors import ListedColormap
 
 from crane.stride import StrideResult
 
@@ -59,7 +59,7 @@ def animate_walk(
     None なら simplest 規約 lambda q0, q1: (q0, q0 - q1)。
     """
     if angles_of is None:
-        angles_of = lambda q0, q1: (q0, q0 - q1)  # noqa: E731
+        angles_of = lambda q0, q1: (q0, q0 - q1)
 
     rot = np.array([[np.cos(-gamma), -np.sin(-gamma)], [np.sin(-gamma), np.cos(-gamma)]])
 

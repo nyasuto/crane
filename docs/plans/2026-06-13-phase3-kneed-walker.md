@@ -142,6 +142,7 @@ def stride(
         xs.append(x_seg)
 
     for i_phase, phase in enumerate(model.phases):
+
         def event(t, x_, _p=phase):
             return _p.event_value(x_)
 
@@ -151,8 +152,7 @@ def stride(
         while True:
             if t0 >= t_max:
                 raise StrideError(
-                    f"phase {i_phase}: no terminal event before t_max={t_max} "
-                    f"(t={t0:.3f})"
+                    f"phase {i_phase}: no terminal event before t_max={t_max} (t={t0:.3f})"
                 )
             burn = solve_ivp(phase.dynamics, (t0, t0 + T_BURN), x, rtol=rtol, atol=atol)
             append(burn.t, burn.y)
@@ -163,9 +163,7 @@ def stride(
             sol = solve_ivp(phase.dynamics, (t0, t_max), x, events=event, rtol=rtol, atol=atol)
             append(sol.t, sol.y)
             if sol.t_events[0].size == 0:
-                raise StrideError(
-                    f"phase {i_phase}: no terminal event before t_max={t_max}"
-                )
+                raise StrideError(f"phase {i_phase}: no terminal event before t_max={t_max}")
             t_e = sol.t_events[0][0]
             x_e = sol.y_events[0][0]
             if phase.event_accept(x_e):
@@ -279,9 +277,15 @@ from crane import references_kneed as ref
 from crane.models.kneed import KneedParams, dynamics_locked, dynamics_unlocked, energy
 
 P = KneedParams(
-    m_h=ref.M_HIP, m_t=ref.M_THIGH, m_s=ref.M_SHANK,
-    l_t=ref.L_THIGH, l_s=ref.L_SHANK, b_t=ref.B_THIGH, b_s=ref.B_SHANK,
-    gamma=ref.GAMMA_GAIT, g=ref.G,
+    m_h=ref.M_HIP,
+    m_t=ref.M_THIGH,
+    m_s=ref.M_SHANK,
+    l_t=ref.L_THIGH,
+    l_s=ref.L_SHANK,
+    b_t=ref.B_THIGH,
+    b_s=ref.B_SHANK,
+    gamma=ref.GAMMA_GAIT,
+    g=ref.G,
 )
 
 
@@ -295,8 +299,7 @@ def test_equilibrium_aligned_with_gravity():
 def test_unlocked_phase_conserves_energy():
     """unlocked 相は保存系。"""
     x0 = np.array([0.2, -0.2, -0.45, -1.2, 1.0, 2.5])
-    sol = solve_ivp(lambda t, x: dynamics_unlocked(t, x, P), (0.0, 0.4), x0,
-                    rtol=1e-11, atol=1e-13)
+    sol = solve_ivp(lambda t, x: dynamics_unlocked(t, x, P), (0.0, 0.4), x0, rtol=1e-11, atol=1e-13)
     e0 = energy(sol.y[:, 0], P)
     drift = max(abs(energy(sol.y[:, k], P) - e0) for k in range(sol.y.shape[1]))
     assert drift < 1e-7 * abs(e0)
@@ -305,13 +308,12 @@ def test_unlocked_phase_conserves_energy():
 def test_locked_phase_conserves_energy_and_keeps_alignment():
     """locked 相は保存系で、θ_th = θ_sh が維持される（6D 埋め込みの整合）。"""
     x0 = np.array([0.25, -0.3, -0.3, -1.5, 0.8, 0.8])
-    sol = solve_ivp(lambda t, x: dynamics_locked(t, x, P), (0.0, 0.4), x0,
-                    rtol=1e-11, atol=1e-13)
+    sol = solve_ivp(lambda t, x: dynamics_locked(t, x, P), (0.0, 0.4), x0, rtol=1e-11, atol=1e-13)
     e0 = energy(sol.y[:, 0], P)
     drift = max(abs(energy(sol.y[:, k], P) - e0) for k in range(sol.y.shape[1]))
     assert drift < 1e-7 * abs(e0)
-    assert np.allclose(sol.y[1], sol.y[2], atol=1e-9)   # θ_th ≡ θ_sh
-    assert np.allclose(sol.y[4], sol.y[5], atol=1e-9)   # θ̇_th ≡ θ̇_sh
+    assert np.allclose(sol.y[1], sol.y[2], atol=1e-9)  # θ_th ≡ θ_sh
+    assert np.allclose(sol.y[4], sol.y[5], atol=1e-9)  # θ̇_th ≡ θ̇_sh
 
 
 def test_locked_dynamics_is_unlocked_restricted():
@@ -387,8 +389,8 @@ def _build():
     # stance 脚（直線、足原点）: hip は足から脚全長ぶん上
     hip = sp.Matrix([-length * sp.sin(th_st), length * sp.cos(th_st)])
     knee_st = hip + l_t * down(th_st)
-    p_th_st = hip + b_t * down(th_st)        # stance 大腿質量点
-    p_sh_st = knee_st + b_s * down(th_st)    # stance 脛質量点
+    p_th_st = hip + b_t * down(th_st)  # stance 大腿質量点
+    p_sh_st = knee_st + b_s * down(th_st)  # stance 脛質量点
     # swing 脚
     p_th_sw = hip + b_t * down(th_th)
     knee_sw = hip + l_t * down(th_th)
@@ -443,8 +445,12 @@ def _build():
     #   速度: w_st→wq_st, w_th→wq_leg, w_sh→wq_leg（新 swing 脚は衝突中剛体）
     wq_st, wq_leg = sp.symbols("wq_st wq_leg")
     swap_hs = {
-        th_st: th_th, th_th: th_st, th_sh: th_st,
-        w_st: wq_st, w_th: wq_leg, w_sh: wq_leg,
+        th_st: th_th,
+        th_th: th_st,
+        th_sh: th_st,
+        w_st: wq_st,
+        w_th: wq_leg,
+        w_sh: wq_leg,
     }
     L_stleg_hip3 = angular_momentum([(m_t, p_th_st), (m_s, p_sh_st)], q3, qd3, hip)
     L_sys_swfoot3 = angular_momentum(bodies, q3, qd3, foot_sw)
@@ -472,8 +478,9 @@ def dynamics_unlocked(t: float, x, p: KneedParams):
 def dynamics_locked(t: float, x, p: KneedParams):
     """locked 相: 2 DOF を 6D に埋め込み（θ_th スロットを θ_sw として使う）。"""
     f_qdd2 = _build()[1]
-    qdd = f_qdd2(x[0], x[1], x[3], x[4],
-                 p.m_h, p.m_t, p.m_s, p.l_t, p.l_s, p.b_t, p.b_s, p.gamma, p.g)
+    qdd = f_qdd2(
+        x[0], x[1], x[3], x[4], p.m_h, p.m_t, p.m_s, p.l_t, p.l_s, p.b_t, p.b_s, p.gamma, p.g
+    )
     return [x[3], x[4], x[5], qdd[0], qdd[1], qdd[1]]
 
 
@@ -513,13 +520,22 @@ import numpy as np
 
 from crane import references_kneed as ref
 from crane.models.kneed import (
-    KneedParams, heelstrike_map, kinetic_energy, kneestrike_map,
+    KneedParams,
+    heelstrike_map,
+    kinetic_energy,
+    kneestrike_map,
 )
 
 P = KneedParams(
-    m_h=ref.M_HIP, m_t=ref.M_THIGH, m_s=ref.M_SHANK,
-    l_t=ref.L_THIGH, l_s=ref.L_SHANK, b_t=ref.B_THIGH, b_s=ref.B_SHANK,
-    gamma=ref.GAMMA_GAIT, g=ref.G,
+    m_h=ref.M_HIP,
+    m_t=ref.M_THIGH,
+    m_s=ref.M_SHANK,
+    l_t=ref.L_THIGH,
+    l_s=ref.L_SHANK,
+    b_t=ref.B_THIGH,
+    b_s=ref.B_SHANK,
+    gamma=ref.GAMMA_GAIT,
+    g=ref.G,
 )
 
 
@@ -527,8 +543,8 @@ def test_kneestrike_locks_and_dissipates():
     """knee-strike: 位置不変・速度等値化・KE 非増加。"""
     x_pre = np.array([-0.05, 0.25, 0.25, -1.3, -0.6, 1.8])  # θ_th=θ_sh（lock 面）
     x_post = kneestrike_map(x_pre, P)
-    assert np.allclose(x_post[:3], x_pre[:3])          # 位置不変
-    assert x_post[4] == x_post[5]                      # 速度ロック
+    assert np.allclose(x_post[:3], x_pre[:3])  # 位置不変
+    assert x_post[4] == x_post[5]  # 速度ロック
     assert kinetic_energy(x_post, P) < kinetic_energy(x_pre, P)
 
 
@@ -550,10 +566,10 @@ def test_heelstrike_swaps_and_dissipates():
     th = -0.18
     x_pre = np.array([th, -th, -th, -1.4, -0.9, -0.9])  # locked, strike 面上
     x_post = heelstrike_map(x_pre, P)
-    assert x_post[0] == -th          # 新 stance = 旧 swing 角
-    assert x_post[1] == th           # 新 swing 大腿 = 旧 stance 角
-    assert x_post[2] == th           # 新 swing 脛も整列
-    assert x_post[4] == x_post[5]    # 衝突中は剛体: θ̇_th⁺ = θ̇_sh⁺
+    assert x_post[0] == -th  # 新 stance = 旧 swing 角
+    assert x_post[1] == th  # 新 swing 大腿 = 旧 stance 角
+    assert x_post[2] == th  # 新 swing 脛も整列
+    assert x_post[4] == x_post[5]  # 衝突中は剛体: θ̇_th⁺ = θ̇_sh⁺
     assert kinetic_energy(x_post, P) < kinetic_energy(x_pre, P)
 
 
@@ -613,13 +629,13 @@ def make_kneed(p: KneedParams) -> HybridModel:
     """
     unlocked = PhaseSpec(
         dynamics=lambda t, x: dynamics_unlocked(t, x, p),
-        event_value=lambda x: x[2] - x[1],   # θ_sh − θ_th = 0 で knee-strike
-        event_accept=lambda x: True,          # transversal 交差は常にロック係合
+        event_value=lambda x: x[2] - x[1],  # θ_sh − θ_th = 0 で knee-strike
+        event_accept=lambda x: True,  # transversal 交差は常にロック係合
         impact=lambda x: kneestrike_map(x, p),
     )
     locked = PhaseSpec(
         dynamics=lambda t, x: dynamics_locked(t, x, p),
-        event_value=lambda x: x[0] + x[1],   # θ_st + θ_sw = 0 で heel-strike
+        event_value=lambda x: x[0] + x[1],  # θ_st + θ_sw = 0 で heel-strike
         event_accept=lambda x: x[0] < 0.0 and (x[3] + x[4]) < 0.0,
         impact=lambda x: heelstrike_map(x, p),
     )
@@ -641,9 +657,15 @@ from crane.models.kneed import KneedParams, make_kneed
 from crane.stride import stride
 
 P = KneedParams(
-    m_h=ref.M_HIP, m_t=ref.M_THIGH, m_s=ref.M_SHANK,
-    l_t=ref.L_THIGH, l_s=ref.L_SHANK, b_t=ref.B_THIGH, b_s=ref.B_SHANK,
-    gamma=ref.GAMMA_GAIT, g=ref.G,
+    m_h=ref.M_HIP,
+    m_t=ref.M_THIGH,
+    m_s=ref.M_SHANK,
+    l_t=ref.L_THIGH,
+    l_s=ref.L_SHANK,
+    b_t=ref.B_THIGH,
+    b_s=ref.B_SHANK,
+    gamma=ref.GAMMA_GAIT,
+    g=ref.G,
 )
 MODEL = make_kneed(P)
 
@@ -652,11 +674,11 @@ def test_stride_passes_both_phases_and_returns_to_section():
     """文献 seed から 1 stride: knee-strike → heel-strike を経て断面に戻る。"""
     result = stride(MODEL, MODEL.lift(np.array(ref.SECTION_GUESS)))
     x_end = result.x_end
-    assert np.isclose(x_end[1], -x_end[0], atol=1e-8)   # θ_th = −θ_st
-    assert np.isclose(x_end[2], -x_end[0], atol=1e-8)   # θ_sh = −θ_st
+    assert np.isclose(x_end[1], -x_end[0], atol=1e-8)  # θ_th = −θ_st
+    assert np.isclose(x_end[2], -x_end[0], atol=1e-8)  # θ_sh = −θ_st
     assert result.t_step > 0.1
     # trajectory 中に膝の屈曲が現れている（unlocked 相の実在確認）
-    flexion = result.x[2] - result.x[1]                  # θ_sh − θ_th
+    flexion = result.x[2] - result.x[1]  # θ_sh − θ_th
     assert np.max(np.abs(flexion)) > 1e-3
 
 
@@ -710,13 +732,23 @@ from crane.search import find_limit_cycle
 #   大腿質量 5 kg を hip から b_t=0.5 に、脛はほぼ無質量。
 #   l_t + l_s = 1 を維持（l_t=0.5, l_s=0.5）。
 P_DEG = KneedParams(
-    m_h=gref.M_HIP, m_t=gref.M_LEG, m_s=1e-9,
-    l_t=0.5, l_s=0.5, b_t=gref.B, b_s=0.25,
-    gamma=gref.GAMMA_GAIT, g=gref.G,
+    m_h=gref.M_HIP,
+    m_t=gref.M_LEG,
+    m_s=1e-9,
+    l_t=0.5,
+    l_s=0.5,
+    b_t=gref.B,
+    b_s=0.25,
+    gamma=gref.GAMMA_GAIT,
+    g=gref.G,
 )
 P_COMPASS = CompassParams(
-    m=gref.M_LEG, m_h=gref.M_HIP, a=gref.A, b=gref.B,
-    gamma=gref.GAMMA_GAIT, g=gref.G,
+    m=gref.M_LEG,
+    m_h=gref.M_HIP,
+    a=gref.A,
+    b=gref.B,
+    gamma=gref.GAMMA_GAIT,
+    g=gref.G,
 )
 C_MODEL = make_compass(P_COMPASS)
 
@@ -800,9 +832,15 @@ from crane.search import find_limit_cycle
 from crane.stride import stride
 
 P = KneedParams(
-    m_h=ref.M_HIP, m_t=ref.M_THIGH, m_s=ref.M_SHANK,
-    l_t=ref.L_THIGH, l_s=ref.L_SHANK, b_t=ref.B_THIGH, b_s=ref.B_SHANK,
-    gamma=ref.GAMMA_GAIT, g=ref.G,
+    m_h=ref.M_HIP,
+    m_t=ref.M_THIGH,
+    m_s=ref.M_SHANK,
+    l_t=ref.L_THIGH,
+    l_s=ref.L_SHANK,
+    b_t=ref.B_THIGH,
+    b_s=ref.B_SHANK,
+    gamma=ref.GAMMA_GAIT,
+    g=ref.G,
 )
 MODEL = make_kneed(P)
 
@@ -852,9 +890,15 @@ def test_gait_family_continues_near_published_slope():
     y = fp0.y
     for scale in [0.95, 0.9, 0.85, 0.8]:
         p = KneedParams(
-            m_h=ref.M_HIP, m_t=ref.M_THIGH, m_s=ref.M_SHANK,
-            l_t=ref.L_THIGH, l_s=ref.L_SHANK, b_t=ref.B_THIGH, b_s=ref.B_SHANK,
-            gamma=ref.GAMMA_GAIT * scale, g=ref.G,
+            m_h=ref.M_HIP,
+            m_t=ref.M_THIGH,
+            m_s=ref.M_SHANK,
+            l_t=ref.L_THIGH,
+            l_s=ref.L_SHANK,
+            b_t=ref.B_THIGH,
+            b_s=ref.B_SHANK,
+            gamma=ref.GAMMA_GAIT * scale,
+            g=ref.G,
         )
         fp = find_limit_cycle(make_kneed(p), y)
         if not fp.converged:

@@ -9,7 +9,7 @@ from crane.derive.lagrange import derive_qdd
 
 def test_pendulum_eom():
     """単振子: θ̈ = −(g/l) sin θ を解析解として照合。"""
-    th, w, m, l, g = sp.symbols("th w m l g", positive=True)  # noqa: E741
+    th, w, m, l, g = sp.symbols("th w m l g", positive=True)
     T = m * l**2 * w**2 / 2
     V = -m * g * l * sp.cos(th)
     qdd = derive_qdd([th], [w], T, V)
@@ -29,7 +29,7 @@ def test_free_particle_2d():
 
 def test_lambdify_numeric():
     """lambdify した EOM が数値評価できる。"""
-    th, w, g, l = sp.symbols("th w g l", positive=True)  # noqa: E741
+    th, w, g, l = sp.symbols("th w g l", positive=True)
     T = l**2 * w**2 / 2
     V = -g * l * sp.cos(th)
     qdd = derive_qdd([th], [w], T, V)
