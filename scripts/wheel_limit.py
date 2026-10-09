@@ -12,21 +12,21 @@ import json
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-from matplotlib.colors import ListedColormap  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import ListedColormap
 
-from crane import references_mcgeer as ref  # noqa: E402
-from crane.basin import basin_slice  # noqa: E402
-from crane.efficiency import mechanical_cot, relative_loss, step_collision_loss  # noqa: E402
-from crane.models.rocker_compass import (  # noqa: E402
+from crane import references_mcgeer as ref
+from crane.basin import basin_slice
+from crane.efficiency import mechanical_cot, relative_loss, step_collision_loss
+from crane.models.rocker_compass import (
     RockerCompassParams,
     kinetic_energy,
     make_rocker_compass,
 )
-from crane.runs import new_run_dir  # noqa: E402
-from crane.search import find_limit_cycle  # noqa: E402
-from crane.stride import StrideError, stride  # noqa: E402
+from crane.runs import new_run_dir
+from crane.search import find_limit_cycle
+from crane.stride import StrideError, stride
 
 
 def _params(R):

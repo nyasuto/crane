@@ -2,7 +2,6 @@ import numpy as np
 
 from crane.models.simplest import SimplestParams, dynamics, heelstrike_map, lift
 
-
 P = SimplestParams(gamma=0.009)
 
 

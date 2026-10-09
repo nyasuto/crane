@@ -12,20 +12,20 @@ import json
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-from matplotlib.colors import ListedColormap  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import ListedColormap
 
-from crane.basin import basin_slice  # noqa: E402
-from crane.models.powered_rocker_compass import (  # noqa: E402
+from crane.basin import basin_slice
+from crane.models.powered_rocker_compass import (
     PoweredRockerCompassParams,
     make_powered_rocker_compass,
 )
-from crane.models.rocker_compass import RockerCompassParams, make_rocker_compass  # noqa: E402
-from crane.runs import new_run_dir  # noqa: E402
-from crane.search import find_limit_cycle  # noqa: E402
+from crane.models.rocker_compass import RockerCompassParams, make_rocker_compass
+from crane.runs import new_run_dir
+from crane.search import find_limit_cycle
 
-NOM = dict(m=1.0, m_h=0.0, c=0.37, rho=0.32, L=1.0, gamma=0.030, g=9.81)
+NOM = {"m": 1.0, "m_h": 0.0, "c": 0.37, "rho": 0.32, "L": 1.0, "gamma": 0.030, "g": 9.81}
 R_VALUES = [0.05, 0.20, 0.40, 0.60]
 P_VALUES = [0.0, 0.04, 0.08]
 

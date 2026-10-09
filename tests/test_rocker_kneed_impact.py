@@ -2,30 +2,30 @@ import numpy as np
 
 from crane import references_kneed as kref
 from crane.models.kneed import KneedParams
-from crane.models.kneed import dynamics_unlocked as kn_unlocked
 from crane.models.kneed import dynamics_locked as kn_locked
-from crane.models.kneed import kneestrike_map as kn_ks
+from crane.models.kneed import dynamics_unlocked as kn_unlocked
 from crane.models.kneed import heelstrike_map as kn_hs
+from crane.models.kneed import kneestrike_map as kn_ks
 from crane.models.rocker_kneed import (
     RockerKneedParams,
-    dynamics_unlocked,
     dynamics_locked,
+    dynamics_unlocked,
     heelstrike_map,
-    kneestrike_map,
     kinetic_energy,
+    kneestrike_map,
 )
 
-KW = dict(
-    m_h=kref.M_HIP,
-    m_t=kref.M_THIGH,
-    m_s=kref.M_SHANK,
-    l_t=kref.L_THIGH,
-    l_s=kref.L_SHANK,
-    b_t=kref.B_THIGH,
-    b_s=kref.B_SHANK,
-    gamma=kref.GAMMA_GAIT,
-    g=kref.G,
-)
+KW = {
+    "m_h": kref.M_HIP,
+    "m_t": kref.M_THIGH,
+    "m_s": kref.M_SHANK,
+    "l_t": kref.L_THIGH,
+    "l_s": kref.L_SHANK,
+    "b_t": kref.B_THIGH,
+    "b_s": kref.B_SHANK,
+    "gamma": kref.GAMMA_GAIT,
+    "g": kref.G,
+}
 P = RockerKneedParams(R=0.2, **KW)
 
 

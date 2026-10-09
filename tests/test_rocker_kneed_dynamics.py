@@ -2,7 +2,7 @@ import numpy as np
 from scipy.integrate import solve_ivp
 
 from crane import references_kneed as kref
-from crane.models.rocker_kneed import RockerKneedParams, dynamics_unlocked, dynamics_locked, energy
+from crane.models.rocker_kneed import RockerKneedParams, dynamics_locked, dynamics_unlocked, energy
 
 P = RockerKneedParams(
     m_h=kref.M_HIP,

@@ -49,9 +49,7 @@ from crane import references as ref
 
 def _simplest_fp():
     model = make_simplest(SimplestParams(gamma=ref.GAMMA_REF))
-    fp = find_limit_cycle(
-        model, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT])
-    )
+    fp = find_limit_cycle(model, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT]))
     assert fp.converged
     return model, fp.y
 
@@ -153,9 +151,7 @@ from crane import references as ref
 
 def _simplest_fp():
     model = make_simplest(SimplestParams(gamma=ref.GAMMA_REF))
-    fp = find_limit_cycle(
-        model, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT])
-    )
+    fp = find_limit_cycle(model, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT]))
     assert fp.converged
     return fp.y
 
@@ -210,6 +206,7 @@ Expected: FAIL（`ImportError: cannot import name 'basin_slice'`）
 from collections.abc import Callable
 from dataclasses import dataclass
 from multiprocessing import Pool
+
 
 # --- ファイル末尾に追加 ---
 @dataclass(frozen=True)
@@ -342,9 +339,7 @@ def test_small_neighborhood_all_converges_simplest():
     basin が固有値解析と整合することの内部ゲート。
     """
     model = make_simplest(SimplestParams(gamma=ref.GAMMA_REF))
-    fp = find_limit_cycle(
-        model, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT])
-    )
+    fp = find_limit_cycle(model, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT]))
     assert fp.converged
     assert np.max(np.abs(fp.eigenvalues)) < 1.0  # 前提（Phase 1 ゲート）
 
@@ -425,6 +420,7 @@ Expected: FAIL（`ImportError: cannot import name 'plot_basin'`）
 # --- 先頭 import 群に追加 ---
 from matplotlib.colors import ListedColormap  # noqa: E402
 
+
 # --- ファイル末尾に追加（BasinResult は型注釈のみなので文字列注釈で循環 import 回避）---
 def plot_basin(result, out: Path) -> None:
     """basin 分類グリッドを描画。CONVERGED=緑, FELL=赤, UNDECIDED=灰。"""
@@ -450,9 +446,7 @@ def plot_basin(result, out: Path) -> None:
     ax.plot(result.fixed_point[a0], result.fixed_point[a1], "k*", markersize=12)
     ax.set_xlabel(f"section[{a0}]")
     ax.set_ylabel(f"section[{a1}]")
-    ax.set_title(
-        f"{result.model_name}  basin_fraction={result.basin_fraction:.3f}"
-    )
+    ax.set_title(f"{result.model_name}  basin_fraction={result.basin_fraction:.3f}")
     fig.savefig(out, dpi=150)
     plt.close(fig)
 ```
@@ -528,8 +522,12 @@ def _registry():
         "compass": (
             make_compass,
             CompassParams(
-                m=ref_c.M_LEG, m_h=ref_c.M_HIP, a=ref_c.A, b=ref_c.B,
-                gamma=ref_c.GAMMA_GAIT, g=ref_c.G,
+                m=ref_c.M_LEG,
+                m_h=ref_c.M_HIP,
+                a=ref_c.A,
+                b=ref_c.B,
+                gamma=ref_c.GAMMA_GAIT,
+                g=ref_c.G,
             ),
             np.array(ref_c.SECTION_GUESS),
             (0, 1),
@@ -538,9 +536,15 @@ def _registry():
         "kneed": (
             make_kneed,
             KneedParams(
-                m_h=ref_k.M_HIP, m_t=ref_k.M_THIGH, m_s=ref_k.M_SHANK,
-                l_t=ref_k.L_THIGH, l_s=ref_k.L_SHANK, b_t=ref_k.B_THIGH,
-                b_s=ref_k.B_SHANK, gamma=ref_k.GAMMA_GAIT, g=ref_k.G,
+                m_h=ref_k.M_HIP,
+                m_t=ref_k.M_THIGH,
+                m_s=ref_k.M_SHANK,
+                l_t=ref_k.L_THIGH,
+                l_s=ref_k.L_SHANK,
+                b_t=ref_k.B_THIGH,
+                b_s=ref_k.B_SHANK,
+                gamma=ref_k.GAMMA_GAIT,
+                g=ref_k.G,
             ),
             np.array(ref_k.SECTION_GUESS),
             (0, 1),
@@ -549,9 +553,14 @@ def _registry():
         "rocker_compass": (
             make_rocker_compass,
             RockerCompassParams(
-                m=ref_rc.M_LEG, m_h=ref_rc.M_HIP, c=ref_rc.C_HIP_TO_COM,
-                rho=ref_rc.RHO_GYR, L=ref_rc.L_LEG, R=ref_rc.R_FOOT,
-                gamma=ref_rc.GAMMA_GAIT, g=ref_rc.G,
+                m=ref_rc.M_LEG,
+                m_h=ref_rc.M_HIP,
+                c=ref_rc.C_HIP_TO_COM,
+                rho=ref_rc.RHO_GYR,
+                L=ref_rc.L_LEG,
+                R=ref_rc.R_FOOT,
+                gamma=ref_rc.GAMMA_GAIT,
+                g=ref_rc.G,
             ),
             np.array(ref_rc.SECTION_GUESS),
             (0, 1),
@@ -560,9 +569,16 @@ def _registry():
         "rocker_kneed": (
             make_rocker_kneed,
             RockerKneedParams(
-                m_h=ref_rk.M_HIP, m_t=ref_rk.M_THIGH, m_s=ref_rk.M_SHANK,
-                l_t=ref_rk.L_THIGH, l_s=ref_rk.L_SHANK, b_t=ref_rk.B_THIGH,
-                b_s=ref_rk.B_SHANK, R=ref_rk.R_FOOT, gamma=ref_rk.GAMMA_GAIT, g=ref_rk.G,
+                m_h=ref_rk.M_HIP,
+                m_t=ref_rk.M_THIGH,
+                m_s=ref_rk.M_SHANK,
+                l_t=ref_rk.L_THIGH,
+                l_s=ref_rk.L_SHANK,
+                b_t=ref_rk.B_THIGH,
+                b_s=ref_rk.B_SHANK,
+                R=ref_rk.R_FOOT,
+                gamma=ref_rk.GAMMA_GAIT,
+                g=ref_rk.G,
             ),
             np.array(ref_rk.SECTION_GUESS),
             (0, 1),
@@ -587,9 +603,14 @@ def main() -> None:
     print(f"{args.model}: y*={fp.y}  |lambda|={np.abs(fp.eigenvalues)}")
 
     res = basin_slice(
-        make_fn, params, fp.y,
-        axes=axes, half_widths=half_widths, resolution=args.resolution,
-        model_name=args.model, n_workers=args.workers,
+        make_fn,
+        params,
+        fp.y,
+        axes=axes,
+        half_widths=half_widths,
+        resolution=args.resolution,
+        model_name=args.model,
+        n_workers=args.workers,
     )
     run_dir = new_run_dir(f"basin_{args.model}")
     plot_basin(res, run_dir / "basin.png")
@@ -686,9 +707,7 @@ from crane.search import find_limit_cycle
 
 def _simplest_basin(resolution=60):
     model = make_simplest(SimplestParams(gamma=ref.GAMMA_REF))
-    fp = find_limit_cycle(
-        model, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT])
-    )
+    fp = find_limit_cycle(model, np.array([ref.LONG_PERIOD_THETA, ref.LONG_PERIOD_THETA_DOT]))
     assert fp.converged
     return basin_slice(
         make_simplest,
@@ -792,8 +811,14 @@ def main() -> None:
         if not fp.converged:
             raise SystemExit(f"ERROR: limit cycle not found for {name}")
         res = basin_slice(
-            make_fn, params, fp.y, axes=axes, half_widths=half_widths,
-            resolution=args.resolution, model_name=name, n_workers=args.workers,
+            make_fn,
+            params,
+            fp.y,
+            axes=axes,
+            half_widths=half_widths,
+            resolution=args.resolution,
+            model_name=name,
+            n_workers=args.workers,
         )
         results[name] = res
         print(f"{name}: basin_fraction={res.basin_fraction:.3f}")
@@ -804,9 +829,14 @@ def main() -> None:
     for ax, name in zip(axs, order):
         r = results[name]
         ax.imshow(
-            r.grid, origin="lower",
+            r.grid,
+            origin="lower",
             extent=[r.ax0_vals[0], r.ax0_vals[-1], r.ax1_vals[0], r.ax1_vals[-1]],
-            aspect="auto", cmap=cmap, vmin=0, vmax=2, interpolation="nearest",
+            aspect="auto",
+            cmap=cmap,
+            vmin=0,
+            vmax=2,
+            interpolation="nearest",
         )
         a0, a1 = r.axes
         ax.plot(r.fixed_point[a0], r.fixed_point[a1], "k*", markersize=10)

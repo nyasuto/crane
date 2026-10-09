@@ -1,7 +1,8 @@
 import numpy as np
 
-from crane.models.compass import CompassParams, heelstrike_map as compass_strike
+from crane.models.compass import CompassParams
 from crane.models.compass import dynamics as compass_dyn
+from crane.models.compass import heelstrike_map as compass_strike
 from crane.models.rocker_compass import (
     RockerCompassParams,
     dynamics,

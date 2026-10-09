@@ -1,8 +1,8 @@
 import numpy as np
 
+from crane import references_mcgeer as ref
 from crane.models.rocker_compass import RockerCompassParams, make_rocker_compass
 from crane.search import find_limit_cycle
-from crane import references_mcgeer as ref
 
 
 def _fp_at_R(R, guess):

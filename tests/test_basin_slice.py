@@ -1,9 +1,9 @@
 import numpy as np
 
+from crane import references as ref
 from crane.basin import CONVERGED, BasinResult, basin_slice
 from crane.models.simplest import SimplestParams, make_simplest
 from crane.search import find_limit_cycle
-from crane import references as ref
 
 
 def _simplest_fp():
@@ -34,12 +34,12 @@ def test_basin_slice_shape_and_center():
 
 def test_basin_slice_serial_parallel_agree():
     y_star = _simplest_fp()
-    kw = dict(
-        axes=(0, 1),
-        half_widths=(0.01, 0.01),
-        resolution=5,
-        model_name="simplest",
-    )
+    kw = {
+        "axes": (0, 1),
+        "half_widths": (0.01, 0.01),
+        "resolution": 5,
+        "model_name": "simplest",
+    }
     serial = basin_slice(
         make_simplest, SimplestParams(gamma=ref.GAMMA_REF), y_star, n_workers=1, **kw
     )

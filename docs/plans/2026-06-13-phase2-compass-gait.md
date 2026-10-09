@@ -601,9 +601,7 @@ def _build():
         return r.jacobian(q) * sp.Matrix(qd)
 
     T = (
-        m_h * vel(hip).dot(vel(hip))
-        + m * vel(p_st).dot(vel(p_st))
-        + m * vel(p_sw).dot(vel(p_sw))
+        m_h * vel(hip).dot(vel(hip)) + m * vel(p_st).dot(vel(p_st)) + m * vel(p_sw).dot(vel(p_sw))
     ) / 2
     g_dir = sp.Matrix([sp.sin(gamma), -sp.cos(gamma)])  # slope frame の重力方向
     V = -g * (m_h * hip.dot(g_dir) + m * p_st.dot(g_dir) + m * p_sw.dot(g_dir))
@@ -1051,10 +1049,16 @@ def main() -> None:
         if sel.size:
             stable = sel[sel[:, 3] < 1.0]
             unstable = sel[sel[:, 3] >= 1.0]
-            ax1.plot(np.rad2deg(stable[:, 0]), stable[:, 2], marker, ms=3, label=f"p{period} stable")
+            ax1.plot(
+                np.rad2deg(stable[:, 0]), stable[:, 2], marker, ms=3, label=f"p{period} stable"
+            )
             if unstable.size:
                 ax1.plot(
-                    np.rad2deg(unstable[:, 0]), unstable[:, 2], marker, ms=3, mfc="none",
+                    np.rad2deg(unstable[:, 0]),
+                    unstable[:, 2],
+                    marker,
+                    ms=3,
+                    mfc="none",
                     label=f"p{period} unstable",
                 )
     ax1.set_ylabel("theta* [rad]")

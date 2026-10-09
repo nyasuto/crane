@@ -1,11 +1,12 @@
 """Poincaré shooting と固有値解析のテスト。"""
 
+import itertools
+
 import numpy as np
 
 from crane import references as ref
 from crane.models.simplest import SimplestParams, make_simplest
 from crane.search import find_limit_cycle
-
 
 MODEL = make_simplest(SimplestParams(gamma=ref.GAMMA_REF))
 
@@ -70,5 +71,5 @@ def test_backtracking_never_increases_residual():
     assert fp.converged
     residuals = [r for _, r in fp.history]
     assert len(residuals) >= 2
-    for prev, nxt in zip(residuals, residuals[1:]):
+    for prev, nxt in itertools.pairwise(residuals):
         assert nxt <= prev, f"residual increased: {prev:.2e} -> {nxt:.2e}"

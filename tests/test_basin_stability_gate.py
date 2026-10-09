@@ -1,9 +1,9 @@
 import numpy as np
 
+from crane import references as ref
 from crane.basin import CONVERGED, basin_slice
 from crane.models.simplest import SimplestParams, make_simplest
 from crane.search import find_limit_cycle
-from crane import references as ref
 
 
 def test_small_neighborhood_all_converges_simplest():
